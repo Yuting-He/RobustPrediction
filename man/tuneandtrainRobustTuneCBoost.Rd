@@ -29,11 +29,13 @@ and selects the best model based on AUC.
 }
 \examples{
 \dontrun{
-# Example usage:
-data <- ... # your training data
-dataext <- ... # your external validation data
+# Load the sample data
+data(sample_data_train)
+data(sample_data_extern)
+
+# Example usage with the sample data
 mstop_seq <- seq(50, 500, by = 50)
-result <- tuneandtrainRobustTuneCBoost(data, dataext, mstop_seq)
+result <- tuneandtrainRobustTuneCBoost(sample_data_train, sample_data_extern, mstop_seq)
 result$best_mstop
 result$best_model
 }

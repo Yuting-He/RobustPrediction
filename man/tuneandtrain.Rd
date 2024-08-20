@@ -7,27 +7,37 @@
 tuneandtrain(data, dataext = NULL, tuningmethod, classifier, ...)
 }
 \arguments{
-\item{data}{A data frame containing the training data. The first column should be the response variable (factor) and the remaining columns should be the predictor variables.}
+\item{data}{A data frame containing the training data. The first column should be the response variable (factor), and the remaining columns should be the predictor variables.}
 
-\item{dataext}{A data frame containing the external validation data (only needed for specific tuning methods like "ext").}
+\item{dataext}{A data frame containing the external validation data (only needed for specific tuning methods like "ext"). The first column should be the response variable (factor), and the remaining columns should be the predictor variables.}
 
-\item{tuningmethod}{A character string specifying which tuning approach to use. Options are "robusttunec", "ext", "int", and so on.}
+\item{tuningmethod}{A character string specifying which tuning approach to use. Options are "robusttunec", "ext", "int".}
 
-\item{classifier}{A character string specifying which classifier to use. Options are "boosting", "rf", and so on.}
+\item{classifier}{A character string specifying which classifier to use. Options are "boosting", "rf", "lasso", "ridge", "svm".}
 
 \item{...}{Additional parameters to be passed to the specific tuning and training functions.}
 }
 \value{
-A list containing the results of the tuning and training process, specific to the chosen tuning method and classifier.
+A list containing the results of the tuning and training process, specific to the chosen tuning method and classifier. This typically includes the best hyperparameters and the final trained model.
 }
 \description{
-This function tunes and trains a classifier using a specified tuning method.
+This function tunes and trains a classifier using a specified tuning method. Depending on the method chosen, 
+the function will either perform robust tuning, external validation, or internal cross-validation.
 }
 \examples{
 \dontrun{
-# Example usage:
-data <- data.frame(y = factor(c(1, 0, 1, 0)), x1 = rnorm(4), x2 = rnorm(4))
-dataext <- data.frame(y = factor(c(1, 0)), x1 = rnorm(2), x2 = rnorm(2))
-result <- tuneandtrain(data, dataext, tuningmethod = "robusttunec", classifier = "boosting")
+# Load sample data
+data(sample_data_train)
+data(sample_data_extern)
+
+# Example usage: Robust tuning with Boosting classifier
+result_boosting <- tuneandtrain(sample_data_train, sample_data_extern, tuningmethod = "robusttunec", classifier = "boosting")
+result_boosting$best_mstop
+result_boosting$best_model
+
+# Example usage: Internal cross-validation with Random Forest classifier
+result_rf <- tuneandtrain(sample_data_train, tuningmethod = "int", classifier = "rf", num.trees = 500, nfolds = 5, seed = 123)
+result_rf$best_min.node.size
+result_rf$best_model
 }
 }

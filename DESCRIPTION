@@ -10,4 +10,12 @@ License: GPL-3
 Encoding: UTF-8
 RoxygenNote: 7.3.2
 NeedsCompilation: no
-Packaged: 2024-08-19 10:53:20 UTC; yutin
+LazyData: true
+Imports:
+    e1071,
+    glmnet,
+    mboost,
+    mlr,
+    pROC,
+    ranger
+URL: https://github.com/Yuting-He/RobustPrediction

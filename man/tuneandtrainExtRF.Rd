@@ -7,9 +7,9 @@
 tuneandtrainExtRF(data, dataext, num.trees = 500)
 }
 \arguments{
-\item{data}{A data frame containing the training data. The first column should be the response variable (factor) and the remaining columns should be the predictor variables.}
+\item{data}{A data frame containing the training data. The first column should be the response variable (factor), and the remaining columns should be the predictor variables.}
 
-\item{dataext}{A data frame containing the external validation data. The first column should be the response variable (factor) and the remaining columns should be the predictor variables.}
+\item{dataext}{A data frame containing the external validation data. The first column should be the response variable (factor), and the remaining columns should be the predictor variables.}
 
 \item{num.trees}{An integer specifying the number of trees in the Random Forest. Default is 500.}
 }
@@ -17,14 +17,17 @@ tuneandtrainExtRF(data, dataext, num.trees = 500)
 A list containing the best `min.node.size` value and the final trained model (`best_model`).
 }
 \description{
-This function tunes and trains a Random Forest classifier using an external validation dataset.
+This function tunes and trains a Random Forest classifier using an external validation dataset. The function 
+tunes the `min.node.size` parameter based on the performance on the external dataset.
 }
 \examples{
 \dontrun{
-# Example usage:
-data <- ... # your training data
-dataext <- ... # your external validation data
-result <- tuneandtrainExtRF(data, dataext, num.trees = 500)
+# Load sample data
+data(sample_data_train)
+data(sample_data_extern)
+
+# Example usage
+result <- tuneandtrainExtRF(sample_data_train, sample_data_extern, num.trees = 500)
 result$best_min.node.size
 result$best_model
 }

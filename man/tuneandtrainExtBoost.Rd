@@ -7,9 +7,9 @@
 tuneandtrainExtBoost(data, dataext, mstop_seq = seq(5, 1000, by = 5), nu = 0.1)
 }
 \arguments{
-\item{data}{A data frame containing the training data. The first column should be the response variable (factor) and the remaining columns should be the predictor variables.}
+\item{data}{A data frame containing the training data. The first column should be the response variable (factor), and the remaining columns should be the predictor variables.}
 
-\item{dataext}{A data frame containing the external validation data. The first column should be the response variable (factor) and the remaining columns should be the predictor variables.}
+\item{dataext}{A data frame containing the external validation data. The first column should be the response variable (factor), and the remaining columns should be the predictor variables.}
 
 \item{mstop_seq}{A numeric vector of boosting iterations to be evaluated. Default is a sequence starting at 5 and increasing by 5 each time, up to 1000.}
 
@@ -19,15 +19,18 @@ tuneandtrainExtBoost(data, dataext, mstop_seq = seq(5, 1000, by = 5), nu = 0.1)
 A list containing the best number of boosting iterations (`best_mstop`) and the final trained model (`best_model`).
 }
 \description{
-This function tunes and trains a Boosting classifier with using an external validation dataset.
+This function tunes and trains a Boosting classifier using an external validation dataset. The function 
+evaluates different numbers of boosting iterations and selects the best model based on AUC (Area Under the Curve).
 }
 \examples{
 \dontrun{
-# Example usage:
-data <- ... # your training data
-dataext <- ... # your external validation data
+# Load sample data
+data(sample_data_train)
+data(sample_data_extern)
+
+# Example usage
 mstop_seq <- seq(50, 500, by = 50)
-result <- tuneandtrainExt(data, dataext, mstop_seq)
+result <- tuneandtrainExtBoost(sample_data_train, sample_data_extern, mstop_seq = mstop_seq, nu = 0.1)
 result$best_mstop
 result$best_model
 }

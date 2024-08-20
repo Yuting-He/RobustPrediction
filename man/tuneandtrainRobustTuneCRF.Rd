@@ -7,18 +7,28 @@
 tuneandtrainRobustTuneCRF(data, dataext, num.trees = 500)
 }
 \arguments{
-\item{data}{Training data as a data frame. The first column should be the response variable.}
+\item{data}{A data frame containing the training data. The first column should be the response variable (factor), and the remaining columns should be the predictor variables.}
 
-\item{dataext}{External validation data as a data frame. The first column should be the response variable.}
+\item{dataext}{A data frame containing the external validation data. The first column should be the response variable (factor), and the remaining columns should be the predictor variables.}
 
-\item{num.trees}{Number of trees to grow. Default is 500.}
-
-\item{maxit}{Maximum number of iterations. Default is 120000.}
+\item{num.trees}{An integer specifying the number of trees to grow in the Random Forest. Default is 500.}
 }
 \value{
 A list containing the best minimum node size (`best_min_node_size`) and the final trained model (`best_model`).
 }
 \description{
-This function tunes and trains a Random Forest classifier with "RobustTuneC" method, using 5-fold cross-validation 
-and selects the best model based on AUC.
+This function tunes and trains a Random Forest classifier using the "RobustTuneC" method. The function 
+uses 5-fold cross-validation to select the best model based on AUC (Area Under the Curve).
+}
+\examples{
+\dontrun{
+# Load sample data
+data(sample_data_train)
+data(sample_data_extern)
+
+# Example usage
+result <- tuneandtrainRobustTuneCRF(sample_data_train, sample_data_extern, num.trees = 500)
+result$best_min_node_size
+result$best_model
+}
 }

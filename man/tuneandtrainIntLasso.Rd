@@ -7,7 +7,7 @@
 tuneandtrainIntLasso(data, maxit = 120000, nlambda = 200, nfolds = 5)
 }
 \arguments{
-\item{data}{A data frame containing the training data. The first column should be the response variable (factor) and the remaining columns should be the predictor variables.}
+\item{data}{A data frame containing the training data. The first column should be the response variable (factor), and the remaining columns should be the predictor variables.}
 
 \item{maxit}{An integer specifying the maximum number of iterations. Default is 120000.}
 
@@ -19,13 +19,16 @@ tuneandtrainIntLasso(data, maxit = 120000, nlambda = 200, nfolds = 5)
 A list containing the best lambda value (`best_lambda`), the final trained model (`best_model`), the AUC on the training data (`AUC_Train`), and the number of active coefficients (`active_set_Train`).
 }
 \description{
-This function tunes and trains a Lasso classifier using internal cross-validation.
+This function tunes and trains a Lasso classifier using internal cross-validation. The function evaluates 
+different lambda values and selects the best model based on AUC (Area Under the Curve).
 }
 \examples{
 \dontrun{
-# Example usage:
-data <- ... # your training data
-result <- tuneandtrainIntLasso(data)
+# Load sample data
+data(sample_data_train)
+
+# Example usage
+result <- tuneandtrainIntLasso(sample_data_train, maxit = 120000, nlambda = 200, nfolds = 5)
 result$best_lambda
 result$best_model
 result$AUC_Train

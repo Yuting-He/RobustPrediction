@@ -7,18 +7,30 @@
 tuneandtrainRobustTuneCRidge(data, dataext, maxit = 120000, nlambda = 100)
 }
 \arguments{
-\item{data}{Training data as a data frame. The first column should be the response variable.}
+\item{data}{A data frame containing the training data. The first column should be the response variable (factor), and the remaining columns should be the predictor variables.}
 
-\item{dataext}{External validation data as a data frame. The first column should be the response variable.}
+\item{dataext}{A data frame containing the external validation data. The first column should be the response variable (factor), and the remaining columns should be the predictor variables.}
 
 \item{maxit}{Maximum number of iterations. Default is 120000.}
 
-\item{nlambda}{The number of lambda values to use for cross-validation.}
+\item{nlambda}{The number of lambda values to use for cross-validation. Default is 100.}
 }
 \value{
-A list containing the best lambda (`best_lambda`) and the final trained model (`best_model`).
+A list containing the best lambda value (`best_lambda`) and the final trained model (`best_model`).
 }
 \description{
-This function tunes and trains a Ridge classifier with "RobustTuneC" method, using 5-fold cross-validation 
-and selects the best model based on AUC.
+This function tunes and trains a Ridge classifier using the "RobustTuneC" method. The function 
+uses 5-fold cross-validation to select the best model based on AUC (Area Under the Curve).
+}
+\examples{
+\dontrun{
+# Load sample data
+data(sample_data_train)
+data(sample_data_extern)
+
+# Example usage
+result <- tuneandtrainRobustTuneCRidge(sample_data_train, sample_data_extern, maxit = 120000, nlambda = 100)
+result$best_lambda
+result$best_model
+}
 }

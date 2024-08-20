@@ -7,15 +7,33 @@
 tuneandtrainInt(data, classifier, ...)
 }
 \arguments{
-\item{data}{Training data as a data frame. The first column should be the response variable.}
+\item{data}{A data frame containing the training data. The first column should be the response variable (factor), and the remaining columns should be the predictor variables.}
 
-\item{classifier}{The classifier to use. Must be one of 'boosting', 'rf', 'lasso', 'ridge', 'svm'.}
+\item{classifier}{A character string specifying the classifier to use. Must be one of 'boosting', 'rf', 'lasso', 'ridge', 'svm'.}
 
 \item{...}{Additional arguments to pass to the specific classifier function.}
 }
 \value{
-A list containing the results from the specific classifier tuning and training function.
+A list containing the results from the specific classifier tuning and training function, which typically includes the best hyperparameters and the final trained model.
 }
 \description{
-This function tunes and trains a specified classifier using the appropriate method and data.
+This function tunes and trains a specified classifier using internal cross-validation. The classifier is specified 
+by the `classifier` argument, and the function delegates to the appropriate tuning and training function based 
+on this choice.
+}
+\examples{
+\dontrun{
+# Load sample data
+data(sample_data_train)
+
+# Example usage: Tuning and training a Random Forest classifier
+result_rf <- tuneandtrainInt(sample_data_train, classifier = "rf", num.trees = 500, nfolds = 5, seed = 123)
+result_rf$best_min.node.size
+result_rf$best_model
+
+# Example usage: Tuning and training a SVM classifier
+result_svm <- tuneandtrainInt(sample_data_train, classifier = "svm", kernel = "linear", cost_seq = 2^(-5:5), scale = FALSE, nfolds = 5, seed = 123)
+result_svm$best_cost
+result_svm$best_model
+}
 }

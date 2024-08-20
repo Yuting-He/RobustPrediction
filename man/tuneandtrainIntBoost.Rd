@@ -7,25 +7,28 @@
 tuneandtrainIntBoost(data, mstop_seq = seq(5, 1000, by = 5), nu = 0.1)
 }
 \arguments{
-\item{data}{A data frame containing the training data. The first column should be the response variable (factor) and the remaining columns should be the predictor variables.}
+\item{data}{A data frame containing the training data. The first column should be the response variable (factor), and the remaining columns should be the predictor variables.}
 
-\item{mstop_seq}{A numeric vector of boosting iterations to be evaluated.}
+\item{mstop_seq}{A numeric vector of boosting iterations to be evaluated. Default is a sequence from 5 to 1000 with a step of 5.}
 
 \item{nu}{A numeric value for the learning rate. Default is 0.1.}
 }
 \value{
-A list containing the best number of boosting iterations (`best_mstop`) and the AUC on the test data (`AUC_Test`).
+A list containing the best number of boosting iterations (`best_mstop`) and the AUC on the training data (`AUC_Train`).
 }
 \description{
-This function tunes and trains a Boosting classifier using internal cross-validation.
+This function tunes and trains a Boosting classifier using internal cross-validation. The function evaluates 
+different numbers of boosting iterations and selects the best model based on AUC (Area Under the Curve).
 }
 \examples{
 \dontrun{
-# Example usage:
-data <- ... # your training data
+# Load sample data
+data(sample_data_train)
+
+# Example usage
 mstop_seq <- seq(5, 5000, by = 5)
-result <- tuneandtrainIntBoost(data, mstop_seq, nu = 0.1)
+result <- tuneandtrainIntBoost(sample_data_train, mstop_seq, nu = 0.1)
 result$best_mstop
-result$AUC_Test
+result$AUC_Train
 }
 }

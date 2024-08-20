@@ -1,28 +1,33 @@
-#' Package Title: Robust Prediction Package
+#' Package Title: Robust Prediction and Tuning Package
 #'
-#' A brief (one-line) description of what the package does.
+#' This package provides robust parameter tuning and predictive modeling techniques.
 #'
-#' A more detailed description of the package, its purpose, and the main
-#' functionalities it provides. This section can include several lines.
+#' The RobustPrediction package allows users to build and tune classifiers using various methods, 
+#' including RobustTuneC, internal, and external tuning approaches. The package supports a range of 
+#' classifiers, such as boosting, lasso, ridge, random forest, and SVM. It is designed for users 
+#' who need reliable and accurate models, particularly in scenarios where robust parameter tuning is essential.
 #'
 #' @docType package
 #' @name RobustPrediction
 #' @aliases RobustPrediction-package
 #' @details
-#' This package provides tools for building robust predictive models.
-#' It includes functions for model training, validation, and prediction.
+#' This package provides comprehensive tools for robust parameter tuning and predictive modeling.
+#' It includes functions for tuning (via RobustTuneC, internal, and external methods), training, 
+#' and predicting outcomes with various classifiers.
 #'
 #' @section Dependencies:
-#' This package requires the following packages: \code{caret}, \code{randomForest}, \code{glmnet}.
+#' This package requires the following packages: \code{caret}, \code{randomForest}, \code{glmnet}, \code{e1071}.
 #'
 #' @examples
 #' # Example usage:
-#' data(iris)
-#' model <- train_model(iris)
-#' predictions <- predict_outcome(model, newdata)
+#' data(sample_data_train)
+#' data(sample_data_extern)
+#' res <- tuneandtrain(sample_data_train, sample_data_extern, tuningmethod = "robusttunec", classifier = "boosting")
 #'
 #' @references
-#' Doe, J. (2024). \emph{Robust Predictive Modeling Techniques}. Journal of Machine Learning.
+#' Hubert, M., Rousseeuw, P.J., & Verdonck, T. (2020). Robust PCA for skewed data 
+#' and its outlier map. \emph{Journal of Classification}, \emph{37}(2), 189-218. 
+#' doi:10.1007/s00357-020-09368-z.
 "_PACKAGE"
 
 
@@ -43,64 +48,67 @@
 #' 
 #' @examples
 #' \dontrun{
-#' # Example usage:
-#' data <- ... # your training data
-#' dataext <- ... # your external validation data
+#' # Load the sample data
+#' data(sample_data_train)
+#' data(sample_data_extern)
+#'
+#' # Example usage with the sample data
 #' mstop_seq <- seq(50, 500, by = 50)
-#' result <- tuneandtrainRobustTuneCBoost(data, dataext, mstop_seq)
+#' result <- tuneandtrainRobustTuneCBoost(sample_data_train, sample_data_extern, mstop_seq)
 #' result$best_mstop
 #' result$best_model
 #' }
-tuneandtrainRobustTuneCBoost <- function(data, dataext, mstop_seq = seq(5,1000, by = 5), nu = 0.1) {
+tuneandtrainRobustTuneCBoost <- function(data, dataext, mstop_seq = seq(5, 1000, by = 5), nu = 0.1) {
   
-  # library
+  # Load necessary libraries
   library(mboost)
   library(pROC)
   
+  # Ensure data and dataext are matrices
+  x_train <- as.matrix(data[, -1])  # Exclude the response variable (first column)
+  y_train <- as.factor(data[, 1])   # Response variable
+  x_test <- as.matrix(dataext[, -1])  # Exclude the response variable in external data
+  y_test <- as.factor(dataext[, 1])   # Response variable in external data
   
   # 5-fold cross validation
   K <- 5
-  
-  n <- nrow(data)
+  n <- nrow(x_train)
   partition <- rep(1:K, length = n)
   partition <- partition[sample(n)]
   
-  # initialize CV AUC matrix
+  # Initialize CV AUC matrix
   AUC_CV <- matrix(NA, nrow = length(mstop_seq), ncol = K)
   
-  # CV
+  # Cross-validation
   for (j in 1:K) {
-    XTrain <- data[partition != j,]
-    XTest <- data[partition == j,]
+    XTrain <- x_train[partition != j, , drop = FALSE]
+    XTest <- x_train[partition == j, , drop = FALSE]
+    yTrain <- y_train[partition != j]
+    yTest <- y_train[partition == j]
     
-    if (length(levels(as.factor(XTest[,1]))) == 1) {
-      AUC_CV[,j] <- NA
+    if (length(unique(yTest)) == 1) {
+      AUC_CV[, j] <- NA
     } else {
-      # train the model
-      fit_Boost_CV <- glmboost(x = as.matrix(XTrain[,2:ncol(XTrain)]), y = as.factor(XTrain[,1]),
+      # Train the model
+      fit_Boost_CV <- glmboost(x = XTrain, y = yTrain,
                                family = Binomial(), control = boost_control(mstop = max(mstop_seq), nu = nu),
                                center = FALSE)
       
-      for (i in 1:length(mstop_seq)) {
-        # external validation
-        pred_Boost_CV <- predict(fit_Boost_CV[mstop_seq[i]], newdata = XTest[,2:ncol(XTest)], type = "response")
+      for (i in seq_along(mstop_seq)) {
+        # External validation
+        pred_Boost_CV <- predict(fit_Boost_CV[mstop_seq[i]], newdata = XTest, type = "response")
         
         # 1-AUC
-        AUC_CV[i,j] <- 1 - auc(response = XTest[,1], predictor = pred_Boost_CV[,1])
+        AUC_CV[i, j] <- 1 - auc(response = yTest, predictor = pred_Boost_CV[, 1])
       }
     }
   }
   
-  # average 1-AUC
+  # Calculate mean AUC and choose best mstop
   AUC_mean <- rowMeans(AUC_CV, na.rm = TRUE)
   cvmin <- min(AUC_mean, na.rm = TRUE)
-  
-  # define cseq
   cseq <- c(1, 1.1, 1.3, 1.5, 2)
-  
-  # choose best mstop
   AUC_Test.c <- numeric(length(cseq))
-  
   done <- FALSE
   i <- 1
   
@@ -116,50 +124,67 @@ tuneandtrainRobustTuneCBoost <- function(data, dataext, mstop_seq = seq(5,1000, 
       done <- TRUE
     }
     
-    pred_Boost_Test.c <- predict(fit_Boost_CV[mstop.c], newdata = dataext[,2:ncol(dataext)], type = "response")
-    AUC_Test.c[i] <- auc(response = as.factor(dataext[,1]), predictor = pred_Boost_Test.c[,1])[1]
+    pred_Boost_Test.c <- predict(fit_Boost_CV[mstop.c], newdata = x_test, type = "response")
+    AUC_Test.c[i] <- auc(response = y_test, predictor = pred_Boost_Test.c[, 1])[1]
     
     i <- i + 1
   }
   
+  # Final choice of mstop
   nctried <- i - 1
-  c <- cseq[max(which(AUC_Test.c[1:(i-1)] == max(AUC_Test.c[1:(i-1)])))]
+  c_val <- cseq[max(which(AUC_Test.c[1:nctried] == max(AUC_Test.c[1:nctried])))]
   
-  if (c * cvmin < 0.4) {
-    mstop.c <- min(mstop_seq[which(AUC_mean <= cvmin * c)], na.rm = TRUE)
+  if (c_val * cvmin < 0.4) {
+    mstop.c <- min(mstop_seq[which(AUC_mean <= cvmin * c_val)], na.rm = TRUE)
   } else if (cvmin < 0.4) {
     mstop.c <- min(mstop_seq[which(AUC_mean <= 0.4)], na.rm = TRUE)
   } else {
     mstop.c <- min(mstop_seq[which(AUC_mean <= cvmin)], na.rm = TRUE)
   }
   
-  # train the final model
-  final_model <- glmboost(x = as.matrix(data[,2:ncol(data)]), y = as.factor(data[,1]),
+  # Train the final model with the chosen mstop
+  final_model <- glmboost(x = x_train, y = y_train,
                           family = Binomial(), control = boost_control(mstop = mstop.c, nu = nu),
                           center = FALSE)
   
-  # return the result
+  # Return the result
   res <- list(
     best_mstop = mstop.c,
     best_model = final_model
   )
   
-  # class
+  # Set class for the result
   class(res) <- "RobustTuneCBoost"
-  return (res)
+  return(res)
 }
 
 #' Tune and Train RobustTuneC Lasso
 #'
-#' This function tunes and trains a Lasso classifier with "RobustTuneC" method, using 5-fold cross-validation 
-#' and selects the best model based on AUC.
+#' This function tunes and trains a Lasso classifier using the "RobustTuneC" method. The function 
+#' uses 5-fold cross-validation to select the best model based on AUC (Area Under the Curve).
 #'
-#' @param data Training data as a data frame. The first column should be the response variable.
-#' @param dataext External validation data as a data frame. The first column should be the response variable.
+#' @param data A data frame containing the training data. The first column should be the response variable (factor), and the remaining columns should be the predictor variables.
+#' @param dataext A data frame containing the external validation data. The first column should be the response variable (factor), and the remaining columns should be the predictor variables.
 #' @param maxit Maximum number of iterations. Default is 120000.
-#' @param nlambda The number of lambda values to use for cross-validation.
-#' @return A list containing the best lambda (`best_lambda`) and the final trained model (`best_model`).
+#' @param nlambda The number of lambda values to use for cross-validation. Default is 100.
+#'
+#' @return A list containing the best lambda value (`best_lambda`) and the final trained model (`best_model`).
 #' @export
+#'
+#' @import glmnet
+#' @import pROC
+#'
+#' @examples
+#' \dontrun{
+#' # Load sample data
+#' data(sample_data_train)
+#' data(sample_data_extern)
+#'
+#' # Example usage
+#' result <- tuneandtrainRobustTuneCLasso(sample_data_train, sample_data_extern, maxit = 120000, nlambda = 100)
+#' result$best_lambda
+#' result$best_model
+#' }
 tuneandtrainRobustTuneCLasso <- function(data, dataext, maxit = 120000, nlambda = 100) {
   
   # library
@@ -262,15 +287,31 @@ tuneandtrainRobustTuneCLasso <- function(data, dataext, maxit = 120000, nlambda 
 
 #' Tune and Train RobustTuneC Random Forest
 #'
-#' This function tunes and trains a Random Forest classifier with "RobustTuneC" method, using 5-fold cross-validation 
-#' and selects the best model based on AUC.
+#' This function tunes and trains a Random Forest classifier using the "RobustTuneC" method. The function 
+#' uses 5-fold cross-validation to select the best model based on AUC (Area Under the Curve).
 #'
-#' @param data Training data as a data frame. The first column should be the response variable.
-#' @param dataext External validation data as a data frame. The first column should be the response variable.
-#' @param maxit Maximum number of iterations. Default is 120000.
-#' @param num.trees Number of trees to grow. Default is 500.
+#' @param data A data frame containing the training data. The first column should be the response variable (factor), and the remaining columns should be the predictor variables.
+#' @param dataext A data frame containing the external validation data. The first column should be the response variable (factor), and the remaining columns should be the predictor variables.
+#' @param num.trees An integer specifying the number of trees to grow in the Random Forest. Default is 500.
+#'
 #' @return A list containing the best minimum node size (`best_min_node_size`) and the final trained model (`best_model`).
 #' @export
+#'
+#' @import mlr
+#' @import ranger
+#' @import pROC
+#'
+#' @examples
+#' \dontrun{
+#' # Load sample data
+#' data(sample_data_train)
+#' data(sample_data_extern)
+#'
+#' # Example usage
+#' result <- tuneandtrainRobustTuneCRF(sample_data_train, sample_data_extern, num.trees = 500)
+#' result$best_min_node_size
+#' result$best_model
+#' }
 tuneandtrainRobustTuneCRF <- function(data, dataext, num.trees = 500) {
   
   library(mlr)
@@ -397,15 +438,31 @@ tuneandtrainRobustTuneCRF <- function(data, dataext, num.trees = 500) {
 
 #' Tune and Train RobustTuneC Ridge
 #'
-#' This function tunes and trains a Ridge classifier with "RobustTuneC" method, using 5-fold cross-validation 
-#' and selects the best model based on AUC.
+#' This function tunes and trains a Ridge classifier using the "RobustTuneC" method. The function 
+#' uses 5-fold cross-validation to select the best model based on AUC (Area Under the Curve).
 #'
-#' @param data Training data as a data frame. The first column should be the response variable.
-#' @param dataext External validation data as a data frame. The first column should be the response variable.
+#' @param data A data frame containing the training data. The first column should be the response variable (factor), and the remaining columns should be the predictor variables.
+#' @param dataext A data frame containing the external validation data. The first column should be the response variable (factor), and the remaining columns should be the predictor variables.
 #' @param maxit Maximum number of iterations. Default is 120000.
-#' @param nlambda The number of lambda values to use for cross-validation.
-#' @return A list containing the best lambda (`best_lambda`) and the final trained model (`best_model`).
+#' @param nlambda The number of lambda values to use for cross-validation. Default is 100.
+#'
+#' @return A list containing the best lambda value (`best_lambda`) and the final trained model (`best_model`).
 #' @export
+#'
+#' @import glmnet
+#' @import pROC
+#'
+#' @examples
+#' \dontrun{
+#' # Load sample data
+#' data(sample_data_train)
+#' data(sample_data_extern)
+#'
+#' # Example usage
+#' result <- tuneandtrainRobustTuneCRidge(sample_data_train, sample_data_extern, maxit = 120000, nlambda = 100)
+#' result$best_lambda
+#' result$best_model
+#' }
 tuneandtrainRobustTuneCRidge <- function(data, dataext, maxit = 120000, nlambda = 100) {
   
   # library
@@ -507,19 +564,37 @@ tuneandtrainRobustTuneCRidge <- function(data, dataext, maxit = 120000, nlambda 
 }
 
 
-#' Tune and Train RobustTuneC Support Vector Machine(SVM)
+#' Tune and Train RobustTuneC Support Vector Machine (SVM)
 #'
-#' This function tunes and trains a SVM classifier with "RobustTuneC" method, using 5-fold cross-validation 
-#' and selects the best model based on AUC.
+#' This function tunes and trains an SVM classifier using the "RobustTuneC" method. The function 
+#' uses 5-fold cross-validation to select the best model based on AUC (Area Under the Curve).
 #'
-#' @param data Training data as a data frame. The first column should be the response variable.
-#' @param dataext External validation data as a data frame. The first column should be the response variable.
-#' @param seed Random seed for reproducibility. Default is 123.
-#' @param kernel The kernel type to be used in the algorithm. It can be "linear", "polynomial", "radial", or "sigmoid". Default is "linear".
-#' @param cost_seq A sequence of cost values to consider for cross-validation. Default is `2^(-15:15)`.
-#' @param scale A logical vector indicating the variables to be scaled. Default is `FALSE`.
-#' @return A list containing the best cost (`best_cost`) and the final trained model (`best_model`).
+#' @param data A data frame containing the training data. The first column should be the response variable (factor), and the remaining columns should be the predictor variables.
+#' @param dataext A data frame containing the external validation data. The first column should be the response variable (factor), and the remaining columns should be the predictor variables.
+#' @param seed An integer specifying the random seed for reproducibility. Default is 123.
+#' @param kernel A character string specifying the kernel type to be used in the SVM. It can be "linear", "polynomial", "radial", or "sigmoid". Default is "linear".
+#' @param cost_seq A numeric vector of cost values to be evaluated. Default is `2^(-15:15)`.
+#' @param scale A logical value indicating whether to scale the predictor variables. Default is `FALSE`.
+#'
+#' @return A list containing the best cost value (`best_cost`) and the final trained model (`best_model`).
 #' @export
+#'
+#' @import mlr
+#' @import e1071
+#' @import pROC
+#'
+#' @examples
+#' \dontrun{
+#' # Load sample data
+#' data(sample_data_train)
+#' data(sample_data_extern)
+#'
+#' # Example usage
+#' result <- tuneandtrainRobustTuneCSVM(sample_data_train, sample_data_extern, seed = 123, 
+#'                                      kernel = "linear", cost_seq = 2^(-15:15), scale = FALSE)
+#' result$best_cost
+#' result$best_model
+#' }
 tuneandtrainRobustTuneCSVM <- function(data, dataext, seed = 123, kernel = "linear", cost_seq = 2^(-15:15), scale = FALSE) {
   
   # library
@@ -639,22 +714,37 @@ tuneandtrainRobustTuneCSVM <- function(data, dataext, seed = 123, kernel = "line
   return(res)
 }
 
-#' Tune and Train by tuning method RobustTuneC
+#' Tune and Train by Tuning Method RobustTuneC
 #'
-#' This function tunes and trains a specified classifier using the appropriate method and data.
+#' This function tunes and trains a specified classifier using the "RobustTuneC" method and the provided data.
 #'
-#' @param data Training data as a data frame. The first column should be the response variable.
-#' @param dataext External validation data as a data frame. The first column should be the response variable.
-#' @param classifier The classifier to use. Must be one of 'boosting', 'rf', 'lasso', 'ridge', 'svm'.
+#' @param data A data frame containing the training data. The first column should be the response variable (factor), and the remaining columns should be the predictor variables.
+#' @param dataext A data frame containing the external validation data. The first column should be the response variable (factor), and the remaining columns should be the predictor variables.
+#' @param classifier A character string specifying the classifier to use. Must be one of 'boosting', 'rf', 'lasso', 'ridge', or 'svm'.
 #' @param ... Additional arguments to pass to the specific classifier function.
+#'
 #' @return A list containing the results from the specific classifier tuning and training function.
 #' @export
+#'
+#' @examples
+#' \dontrun{
+#' # Load sample data
+#' data(sample_data_train)
+#' data(sample_data_extern)
+#'
+#' # Example usage with Random Forest
+#' result_rf <- tuneandtrainRobustTuneC(sample_data_train, sample_data_extern, classifier = "rf")
+#' result_rf$best_min_node_size
+#' result_rf$best_model
+#'
+#' # Example usage with SVM
+#' result_svm <- tuneandtrainRobustTuneC(sample_data_train, sample_data_extern, classifier = "svm")
+#' result_svm$best_cost
+#' result_svm$best_model
+#' }
 tuneandtrainRobustTuneC <- function(data, dataext, classifier, ...) {
   
-  # arguments
-  #args <- list(...)
-  
-  # run function by classifer
+  # run function by classifier
   if (classifier == "boosting") {
     res <- tuneandtrainRobustTuneCBoost(data = data, dataext = dataext, ...)
   } else if (classifier == "rf") {
@@ -672,12 +762,14 @@ tuneandtrainRobustTuneC <- function(data, dataext, classifier, ...) {
   return(res)
 }
 
+
 #' Tune and Train External Boosting
 #'
-#' This function tunes and trains a Boosting classifier with using an external validation dataset.
+#' This function tunes and trains a Boosting classifier using an external validation dataset. The function 
+#' evaluates different numbers of boosting iterations and selects the best model based on AUC (Area Under the Curve).
 #'
-#' @param data A data frame containing the training data. The first column should be the response variable (factor) and the remaining columns should be the predictor variables.
-#' @param dataext A data frame containing the external validation data. The first column should be the response variable (factor) and the remaining columns should be the predictor variables.
+#' @param data A data frame containing the training data. The first column should be the response variable (factor), and the remaining columns should be the predictor variables.
+#' @param dataext A data frame containing the external validation data. The first column should be the response variable (factor), and the remaining columns should be the predictor variables.
 #' @param mstop_seq A numeric vector of boosting iterations to be evaluated. Default is a sequence starting at 5 and increasing by 5 each time, up to 1000.
 #' @param nu A numeric value for the learning rate. Default is 0.1.
 #'
@@ -688,14 +780,17 @@ tuneandtrainRobustTuneC <- function(data, dataext, classifier, ...) {
 #'
 #' @examples
 #' \dontrun{
-#' # Example usage:
-#' data <- ... # your training data
-#' dataext <- ... # your external validation data
+#' # Load sample data
+#' data(sample_data_train)
+#' data(sample_data_extern)
+#'
+#' # Example usage
 #' mstop_seq <- seq(50, 500, by = 50)
-#' result <- tuneandtrainExt(data, dataext, mstop_seq)
+#' result <- tuneandtrainExtBoost(sample_data_train, sample_data_extern, mstop_seq = mstop_seq, nu = 0.1)
 #' result$best_mstop
 #' result$best_model
 #' }
+
 tuneandtrainExtBoost <- function(data, dataext, mstop_seq = seq(5, 1000, by = 5), nu = 0.1) {
   # Load necessary libraries
   library(mboost)
@@ -747,24 +842,27 @@ tuneandtrainExtBoost <- function(data, dataext, mstop_seq = seq(5, 1000, by = 5)
 
 #' Tune and Train External Lasso
 #'
-#' This function tunes and trains a Lasso classifier using an external validation dataset.
+#' This function tunes and trains a Lasso classifier using an external validation dataset. The function 
+#' selects the best model based on AUC (Area Under the Curve) and provides additional metrics.
 #'
-#' @param data A data frame containing the training data. The first column should be the response variable (factor) and the remaining columns should be the predictor variables.
-#' @param dataext A data frame containing the external validation data. The first column should be the response variable (factor) and the remaining columns should be the predictor variables.
+#' @param data A data frame containing the training data. The first column should be the response variable (factor), and the remaining columns should be the predictor variables.
+#' @param dataext A data frame containing the external validation data. The first column should be the response variable (factor), and the remaining columns should be the predictor variables.
 #' @param maxit An integer specifying the maximum number of iterations. Default is 120000.
-#' @param nlambda An integer specifying the number of lambda values to use in the Lasso model.
+#' @param nlambda An integer specifying the number of lambda values to use in the Lasso model. Default is 100.
 #'
 #' @return A list containing the best lambda value (`best_lambda`), the final trained model (`best_model`), the AUC on the training data (`AUC_Train`), and the number of active coefficients (`active_set_Train`).
-#' @import mboost
+#' @import glmnet
 #' @import pROC
 #' @export
 #'
 #' @examples
 #' \dontrun{
-#' # Example usage:
-#' data <- ... # your training data
-#' dataext <- ... # your external validation data
-#' result <- tuneandtrainExtLasso(data, dataext)
+#' # Load sample data
+#' data(sample_data_train)
+#' data(sample_data_extern)
+#'
+#' # Example usage
+#' result <- tuneandtrainExtLasso(sample_data_train, sample_data_extern, maxit = 120000, nlambda = 100)
 #' result$best_lambda
 #' result$best_model
 #' result$AUC_Train
@@ -826,10 +924,11 @@ tuneandtrainExtLasso <- function(data, dataext, maxit = 120000, nlambda = 100) {
 
 #' Tune and Train External Random Forest
 #'
-#' This function tunes and trains a Random Forest classifier using an external validation dataset.
+#' This function tunes and trains a Random Forest classifier using an external validation dataset. The function 
+#' tunes the `min.node.size` parameter based on the performance on the external dataset.
 #'
-#' @param data A data frame containing the training data. The first column should be the response variable (factor) and the remaining columns should be the predictor variables.
-#' @param dataext A data frame containing the external validation data. The first column should be the response variable (factor) and the remaining columns should be the predictor variables.
+#' @param data A data frame containing the training data. The first column should be the response variable (factor), and the remaining columns should be the predictor variables.
+#' @param dataext A data frame containing the external validation data. The first column should be the response variable (factor), and the remaining columns should be the predictor variables.
 #' @param num.trees An integer specifying the number of trees in the Random Forest. Default is 500.
 #'
 #' @return A list containing the best `min.node.size` value and the final trained model (`best_model`).
@@ -840,10 +939,12 @@ tuneandtrainExtLasso <- function(data, dataext, maxit = 120000, nlambda = 100) {
 #'
 #' @examples
 #' \dontrun{
-#' # Example usage:
-#' data <- ... # your training data
-#' dataext <- ... # your external validation data
-#' result <- tuneandtrainExtRF(data, dataext, num.trees = 500)
+#' # Load sample data
+#' data(sample_data_train)
+#' data(sample_data_extern)
+#'
+#' # Example usage
+#' result <- tuneandtrainExtRF(sample_data_train, sample_data_extern, num.trees = 500)
 #' result$best_min.node.size
 #' result$best_model
 #' }
@@ -901,26 +1002,29 @@ tuneandtrainExtRF <- function(data, dataext, num.trees = 500) {
 }
 
 
-#' Tune and Train External Ridge Regression
+#' Tune and Train External Ridge
 #'
-#' This function tunes and trains a Ridge Regression classifier using an external validation dataset.
+#' This function tunes and trains a Ridge classifier using an external validation dataset. The function 
+#' selects the best model based on AUC (Area Under the Curve) and provides additional metrics.
 #'
-#' @param data A data frame containing the training data. The first column should be the response variable (factor) and the remaining columns should be the predictor variables.
-#' @param dataext A data frame containing the external validation data. The first column should be the response variable (factor) and the remaining columns should be the predictor variables.
+#' @param data A data frame containing the training data. The first column should be the response variable (factor), and the remaining columns should be the predictor variables.
+#' @param dataext A data frame containing the external validation data. The first column should be the response variable (factor), and the remaining columns should be the predictor variables.
 #' @param maxit An integer specifying the maximum number of iterations. Default is 120000.
-#' @param nlambda An integer specifying the number of lambda values to use in the Ridge model.
+#' @param nlambda An integer specifying the number of lambda values to use in the Ridge model. Default is 100.
 #'
-#' @return A list containing the best lambda value (`best_lambda`), the final trained model (`best_model`), the AUC on the training data (`AUC_Train`).
+#' @return A list containing the best lambda value (`best_lambda`), the final trained model (`best_model`), and the AUC on the training data (`AUC_Train`).
 #' @import glmnet
 #' @import pROC
 #' @export
 #'
 #' @examples
 #' \dontrun{
-#' # Example usage:
-#' data <- ... # your training data
-#' dataext <- ... # your external validation data
-#' result <- tuneandtrainExtRidge(data, dataext)
+#' # Load sample data
+#' data(sample_data_train)
+#' data(sample_data_extern)
+#'
+#' # Example usage
+#' result <- tuneandtrainExtRidge(sample_data_train, sample_data_extern, maxit = 120000, nlambda = 100)
 #' result$best_lambda
 #' result$best_model
 #' result$AUC_Train
@@ -977,10 +1081,11 @@ tuneandtrainExtRidge <- function(data, dataext, maxit = 120000, nlambda = 100) {
 
 #' Tune and Train External SVM
 #'
-#' This function tunes and trains an SVM classifier using an external validation dataset.
+#' This function tunes and trains an SVM classifier using an external validation dataset. The function 
+#' selects the best model based on AUC (Area Under the Curve) and provides the final trained model and AUC on the external dataset.
 #'
-#' @param data A data frame containing the training data. The first column should be the response variable (factor) and the remaining columns should be the predictor variables.
-#' @param dataext A data frame containing the external validation data. The first column should be the response variable (factor) and the remaining columns should be the predictor variables.
+#' @param data A data frame containing the training data. The first column should be the response variable (factor), and the remaining columns should be the predictor variables.
+#' @param dataext A data frame containing the external validation data. The first column should be the response variable (factor), and the remaining columns should be the predictor variables.
 #' @param kernel A character string specifying the kernel type to be used in the SVM. Default is "linear".
 #' @param cost_seq A numeric vector of cost values to be evaluated. Default is `2^(-15:15)`.
 #' @param scale A logical indicating whether to scale the predictor variables. Default is FALSE.
@@ -993,10 +1098,12 @@ tuneandtrainExtRidge <- function(data, dataext, maxit = 120000, nlambda = 100) {
 #'
 #' @examples
 #' \dontrun{
-#' # Example usage:
-#' data <- ... # your training data
-#' dataext <- ... # your external validation data
-#' result <- tuneandtrainExtSVM(data, dataext, kernel = "linear", cost_seq = 2^(-15:15), scale = FALSE)
+#' # Load sample data
+#' data(sample_data_train)
+#' data(sample_data_extern)
+#'
+#' # Example usage
+#' result <- tuneandtrainExtSVM(sample_data_train, sample_data_extern, kernel = "linear", cost_seq = 2^(-15:15), scale = FALSE)
 #' result$best_cost
 #' result$best_model
 #' result$AUC_Extern
@@ -1070,16 +1177,35 @@ tuneandtrainExtSVM <- function(data, dataext, kernel = "linear", cost_seq = 2^(-
 
 
 
-#' Tune and Train by tuning method Ext
+#' Tune and Train by Tuning Method Ext
 #'
-#' This function tunes and trains a specified classifier using the appropriate method and data.
+#' This function tunes and trains a specified classifier using an external validation dataset. The function selects 
+#' the appropriate tuning and training function based on the specified classifier.
 #'
-#' @param data Training data as a data frame. The first column should be the response variable.
-#' @param dataext External validation data as a data frame. The first column should be the response variable.
-#' @param classifier The classifier to use. Must be one of 'boosting', 'rf', 'lasso', 'ridge', 'svm'.
+#' @param data A data frame containing the training data. The first column should be the response variable (factor), and the remaining columns should be the predictor variables.
+#' @param dataext A data frame containing the external validation data. The first column should be the response variable (factor), and the remaining columns should be the predictor variables.
+#' @param classifier A character string specifying the classifier to use. Must be one of 'boosting', 'rf', 'lasso', 'ridge', or 'svm'.
 #' @param ... Additional arguments to pass to the specific classifier function.
+#'
 #' @return A list containing the results from the specific classifier tuning and training function.
 #' @export
+#'
+#' @examples
+#' \dontrun{
+#' # Load sample data
+#' data(sample_data_train)
+#' data(sample_data_extern)
+#'
+#' # Example usage with Random Forest
+#' result_rf <- tuneandtrainExt(sample_data_train, sample_data_extern, classifier = "rf", num.trees = 500)
+#' result_rf$best_min.node.size
+#' result_rf$best_model
+#'
+#' # Example usage with SVM
+#' result_svm <- tuneandtrainExt(sample_data_train, sample_data_extern, classifier = "svm", kernel = "linear", cost_seq = 2^(-15:15))
+#' result_svm$best_cost
+#' result_svm$best_model
+#' }
 tuneandtrainExt <- function(data, dataext, classifier, ...) {
   
   # arguments
@@ -1105,25 +1231,28 @@ tuneandtrainExt <- function(data, dataext, classifier, ...) {
 
 #' Tune and Train Internal Boosting
 #'
-#' This function tunes and trains a Boosting classifier using internal cross-validation.
+#' This function tunes and trains a Boosting classifier using internal cross-validation. The function evaluates 
+#' different numbers of boosting iterations and selects the best model based on AUC (Area Under the Curve).
 #'
-#' @param data A data frame containing the training data. The first column should be the response variable (factor) and the remaining columns should be the predictor variables.
-#' @param mstop_seq A numeric vector of boosting iterations to be evaluated.
+#' @param data A data frame containing the training data. The first column should be the response variable (factor), and the remaining columns should be the predictor variables.
+#' @param mstop_seq A numeric vector of boosting iterations to be evaluated. Default is a sequence from 5 to 1000 with a step of 5.
 #' @param nu A numeric value for the learning rate. Default is 0.1.
 #'
-#' @return A list containing the best number of boosting iterations (`best_mstop`) and the AUC on the test data (`AUC_Test`).
+#' @return A list containing the best number of boosting iterations (`best_mstop`) and the AUC on the training data (`AUC_Train`).
 #' @import mboost
 #' @import pROC
 #' @export
 #'
 #' @examples
 #' \dontrun{
-#' # Example usage:
-#' data <- ... # your training data
+#' # Load sample data
+#' data(sample_data_train)
+#'
+#' # Example usage
 #' mstop_seq <- seq(5, 5000, by = 5)
-#' result <- tuneandtrainIntBoost(data, mstop_seq, nu = 0.1)
+#' result <- tuneandtrainIntBoost(sample_data_train, mstop_seq, nu = 0.1)
 #' result$best_mstop
-#' result$AUC_Test
+#' result$AUC_Train
 #' }
 tuneandtrainIntBoost <- function(data, mstop_seq = seq(5,1000, by = 5), nu = 0.1) {
   # Load necessary libraries
@@ -1196,11 +1325,13 @@ tuneandtrainIntBoost <- function(data, mstop_seq = seq(5,1000, by = 5), nu = 0.1
   return(res)
 }
 
+
 #' Tune and Train Internal Lasso
 #'
-#' This function tunes and trains a Lasso classifier using internal cross-validation.
+#' This function tunes and trains a Lasso classifier using internal cross-validation. The function evaluates 
+#' different lambda values and selects the best model based on AUC (Area Under the Curve).
 #'
-#' @param data A data frame containing the training data. The first column should be the response variable (factor) and the remaining columns should be the predictor variables.
+#' @param data A data frame containing the training data. The first column should be the response variable (factor), and the remaining columns should be the predictor variables.
 #' @param maxit An integer specifying the maximum number of iterations. Default is 120000.
 #' @param nlambda An integer specifying the number of lambda values to use in the Lasso model. Default is 200.
 #' @param nfolds An integer specifying the number of folds for cross-validation. Default is 5.
@@ -1212,14 +1343,17 @@ tuneandtrainIntBoost <- function(data, mstop_seq = seq(5,1000, by = 5), nu = 0.1
 #'
 #' @examples
 #' \dontrun{
-#' # Example usage:
-#' data <- ... # your training data
-#' result <- tuneandtrainIntLasso(data)
+#' # Load sample data
+#' data(sample_data_train)
+#'
+#' # Example usage
+#' result <- tuneandtrainIntLasso(sample_data_train, maxit = 120000, nlambda = 200, nfolds = 5)
 #' result$best_lambda
 #' result$best_model
 #' result$AUC_Train
 #' result$active_set_Train
 #' }
+
 tuneandtrainIntLasso <- function(data, maxit = 120000, nlambda = 200, nfolds = 5) {
   # Load necessary libraries
   library(glmnet)
@@ -1289,12 +1423,13 @@ tuneandtrainIntLasso <- function(data, maxit = 120000, nlambda = 200, nfolds = 5
 
 #' Tune and Train Internal Random Forest
 #'
-#' This function tunes and trains a Random Forest classifier using internal cross-validation.
+#' This function tunes and trains a Random Forest classifier using internal cross-validation. The function evaluates 
+#' different `min.node.size` values and selects the best model based on AUC (Area Under the Curve).
 #'
-#' @param data A data frame containing the training data. The first column should be the response variable (factor) and the remaining columns should be the predictor variables.
+#' @param data A data frame containing the training data. The first column should be the response variable (factor), and the remaining columns should be the predictor variables.
 #' @param num.trees An integer specifying the number of trees in the Random Forest. Default is 500.
 #' @param nfolds An integer specifying the number of folds for cross-validation. Default is 5.
-#' @param seed An integer specifying the random seed for reproducibility.
+#' @param seed An integer specifying the random seed for reproducibility. Default is 123.
 #'
 #' @return A list containing the best `min.node.size` value, the final trained model (`best_model`), and the AUC on the training data (`AUC_Train`).
 #' @import ranger
@@ -1304,9 +1439,11 @@ tuneandtrainIntLasso <- function(data, maxit = 120000, nlambda = 200, nfolds = 5
 #'
 #' @examples
 #' \dontrun{
-#' # Example usage:
-#' data <- ... # your training data
-#' result <- tuneandtrainIntRF(data, num.trees = 500, nfolds = 5, seed = 123)
+#' # Load sample data
+#' data(sample_data_train)
+#'
+#' # Example usage
+#' result <- tuneandtrainIntRF(sample_data_train, num.trees = 500, nfolds = 5, seed = 123)
 #' result$best_min.node.size
 #' result$best_model
 #' result$AUC_Train
@@ -1389,26 +1526,29 @@ tuneandtrainIntRF <- function(data, num.trees = 500, nfolds = 5, seed = 123) {
 }
 
 
-#' Tune and Train Internal Ridge Regression
+#' Tune and Train Internal Ridge 
 #'
-#' This function tunes and trains a Ridge Regression classifier using internal cross-validation.
+#' This function tunes and trains a Ridge classifier using internal cross-validation. The function evaluates 
+#' different lambda values and selects the best model based on AUC (Area Under the Curve).
 #'
-#' @param data A data frame containing the training data. The first column should be the response variable (factor) and the remaining columns should be the predictor variables.
+#' @param data A data frame containing the training data. The first column should be the response variable (factor), and the remaining columns should be the predictor variables.
 #' @param maxit An integer specifying the maximum number of iterations. Default is 120000.
-#' @param nlambda An integer specifying the number of lambda values to use in the Ridge model.
+#' @param nlambda An integer specifying the number of lambda values to use in the Ridge model. Default is 200.
 #' @param nfolds An integer specifying the number of folds for cross-validation. Default is 5.
 #' @param seed An integer specifying the random seed for reproducibility. Default is 123.
 #'
-#' @return A list containing the best lambda value (`best_lambda`), the final trained model (`best_model`), the AUC on the training data (`AUC_Train`).
+#' @return A list containing the best lambda value (`best_lambda`), the final trained model (`best_model`), and the AUC on the training data (`AUC_Train`).
 #' @import glmnet
 #' @import pROC
 #' @export
 #'
 #' @examples
 #' \dontrun{
-#' # Example usage:
-#' data <- ... # your training data
-#' result <- tuneandtrainIntRidge(data, maxit = 120000, nlambda = 200, nfolds = 5, seed = 123)
+#' # Load sample data
+#' data(sample_data_train)
+#'
+#' # Example usage
+#' result <- tuneandtrainIntRidge(sample_data_train, maxit = 120000, nlambda = 200, nfolds = 5, seed = 123)
 #' result$best_lambda
 #' result$best_model
 #' result$AUC_Train
@@ -1484,9 +1624,10 @@ tuneandtrainIntRidge <- function(data, maxit = 120000, nlambda = 200, nfolds = 5
 
 #' Tune and Train Internal SVM
 #'
-#' This function tunes and trains an SVM classifier using internal cross-validation.
+#' This function tunes and trains an SVM classifier using internal cross-validation. The function evaluates 
+#' different cost values and selects the best model based on AUC (Area Under the Curve).
 #'
-#' @param data A data frame containing the training data. The first column should be the response variable (factor) and the remaining columns should be the predictor variables.
+#' @param data A data frame containing the training data. The first column should be the response variable (factor), and the remaining columns should be the predictor variables.
 #' @param kernel A character string specifying the kernel type to be used in the SVM. Default is "linear".
 #' @param cost_seq A numeric vector of cost values to be evaluated. Default is `2^(-15:15)`.
 #' @param scale A logical indicating whether to scale the predictor variables. Default is FALSE.
@@ -1501,9 +1642,18 @@ tuneandtrainIntRidge <- function(data, maxit = 120000, nlambda = 200, nfolds = 5
 #'
 #' @examples
 #' \dontrun{
-#' # Example usage:
-#' data <- ... # your training data
-#' result <- tuneandtrainIntSVM(data, kernel = "linear", cost_seq = 2^(-15:15), scale = FALSE, nfolds = 5, seed = 123)
+#' # Load sample data
+#' data(sample_data_train)
+#'
+#' # Example usage
+#' result <- tuneandtrainIntSVM(
+#'   sample_data_train,
+#'   kernel = "linear",
+#'   cost_seq = 2^(-15:15),
+#'   scale = FALSE,
+#'   nfolds = 5,
+#'   seed = 123
+#' )
 #' result$best_cost
 #' result$best_model
 #' result$AUC_Train
@@ -1587,13 +1737,32 @@ tuneandtrainIntSVM <- function(data, kernel = "linear", cost_seq = 2^(-15:15), s
 
 #' Tune and Train by tuning method Int
 #'
-#' This function tunes and trains a specified classifier using the appropriate method and data.
+#' This function tunes and trains a specified classifier using internal cross-validation. The classifier is specified 
+#' by the `classifier` argument, and the function delegates to the appropriate tuning and training function based 
+#' on this choice.
 #'
-#' @param data Training data as a data frame. The first column should be the response variable.
-#' @param classifier The classifier to use. Must be one of 'boosting', 'rf', 'lasso', 'ridge', 'svm'.
+#' @param data A data frame containing the training data. The first column should be the response variable (factor), and the remaining columns should be the predictor variables.
+#' @param classifier A character string specifying the classifier to use. Must be one of 'boosting', 'rf', 'lasso', 'ridge', 'svm'.
 #' @param ... Additional arguments to pass to the specific classifier function.
-#' @return A list containing the results from the specific classifier tuning and training function.
+#'
+#' @return A list containing the results from the specific classifier tuning and training function, which typically includes the best hyperparameters and the final trained model.
 #' @export
+#'
+#' @examples
+#' \dontrun{
+#' # Load sample data
+#' data(sample_data_train)
+#'
+#' # Example usage: Tuning and training a Random Forest classifier
+#' result_rf <- tuneandtrainInt(sample_data_train, classifier = "rf", num.trees = 500, nfolds = 5, seed = 123)
+#' result_rf$best_min.node.size
+#' result_rf$best_model
+#'
+#' # Example usage: Tuning and training a SVM classifier
+#' result_svm <- tuneandtrainInt(sample_data_train, classifier = "svm", kernel = "linear", cost_seq = 2^(-5:5), scale = FALSE, nfolds = 5, seed = 123)
+#' result_svm$best_cost
+#' result_svm$best_model
+#' }
 tuneandtrainInt <- function(data, classifier, ...) {
   
   # arguments
@@ -1619,23 +1788,33 @@ tuneandtrainInt <- function(data, classifier, ...) {
 
 #' Tune and Train Classifier
 #'
-#' This function tunes and trains a classifier using a specified tuning method.
+#' This function tunes and trains a classifier using a specified tuning method. Depending on the method chosen, 
+#' the function will either perform robust tuning, external validation, or internal cross-validation.
 #'
-#' @param data A data frame containing the training data. The first column should be the response variable (factor) and the remaining columns should be the predictor variables.
-#' @param dataext A data frame containing the external validation data (only needed for specific tuning methods like "ext").
-#' @param tuningmethod A character string specifying which tuning approach to use. Options are "robusttunec", "ext", "int", and so on.
-#' @param classifier A character string specifying which classifier to use. Options are "boosting", "rf", and so on.
+#' @param data A data frame containing the training data. The first column should be the response variable (factor), and the remaining columns should be the predictor variables.
+#' @param dataext A data frame containing the external validation data (only needed for specific tuning methods like "ext"). The first column should be the response variable (factor), and the remaining columns should be the predictor variables.
+#' @param tuningmethod A character string specifying which tuning approach to use. Options are "robusttunec", "ext", "int".
+#' @param classifier A character string specifying which classifier to use. Options are "boosting", "rf", "lasso", "ridge", "svm".
 #' @param ... Additional parameters to be passed to the specific tuning and training functions.
 #'
-#' @return A list containing the results of the tuning and training process, specific to the chosen tuning method and classifier.
+#' @return A list containing the results of the tuning and training process, specific to the chosen tuning method and classifier. This typically includes the best hyperparameters and the final trained model.
 #' @export
 #'
 #' @examples
 #' \dontrun{
-#' # Example usage:
-#' data <- data.frame(y = factor(c(1, 0, 1, 0)), x1 = rnorm(4), x2 = rnorm(4))
-#' dataext <- data.frame(y = factor(c(1, 0)), x1 = rnorm(2), x2 = rnorm(2))
-#' result <- tuneandtrain(data, dataext, tuningmethod = "robusttunec", classifier = "boosting")
+#' # Load sample data
+#' data(sample_data_train)
+#' data(sample_data_extern)
+#'
+#' # Example usage: Robust tuning with Boosting classifier
+#' result_boosting <- tuneandtrain(sample_data_train, sample_data_extern, tuningmethod = "robusttunec", classifier = "boosting")
+#' result_boosting$best_mstop
+#' result_boosting$best_model
+#'
+#' # Example usage: Internal cross-validation with Random Forest classifier
+#' result_rf <- tuneandtrain(sample_data_train, tuningmethod = "int", classifier = "rf", num.trees = 500, nfolds = 5, seed = 123)
+#' result_rf$best_min.node.size
+#' result_rf$best_model
 #' }
 tuneandtrain <- function(data, dataext = NULL, tuningmethod, classifier, ...) {
   
@@ -1662,3 +1841,34 @@ tuneandtrain <- function(data, dataext = NULL, tuningmethod, classifier, ...) {
   
   return(res)
 }
+
+
+#' Sample Training Data
+#'
+#' A dataset containing the response variable `y` and 50 selected predictor variables from `data1`.
+#'
+#' @format A data frame with 46 rows and 51 columns (1 response variable and 50 predictors):
+#' \describe{
+#'   \item{y}{Response variable (factor)}
+#'   \item{x1}{First predictor variable (numeric)}
+#'   \item{x2}{Second predictor variable (numeric)}
+#'   ...
+#'   \item{x50}{Fiftieth predictor variable (numeric)}
+#' }
+#' @source Generated from `data1` in the package development process.
+"sample_data_train"
+
+#' Sample External Data
+#'
+#' A dataset containing the response variable `y` and 50 selected predictor variables from `data10`.
+#'
+#' @format A data frame with 49 rows and 51 columns (1 response variable and 50 predictors):
+#' \describe{
+#'   \item{y}{Response variable (factor)}
+#'   \item{x1}{First predictor variable (numeric)}
+#'   \item{x2}{Second predictor variable (numeric)}
+#'   ...
+#'   \item{x50}{Fiftieth predictor variable (numeric)}
+#' }
+#' @source Generated from `data10` in the package development process.
+"sample_data_extern"

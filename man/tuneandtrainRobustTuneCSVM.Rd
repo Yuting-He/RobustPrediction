@@ -2,7 +2,7 @@
 % Please edit documentation in R/functions.R
 \name{tuneandtrainRobustTuneCSVM}
 \alias{tuneandtrainRobustTuneCSVM}
-\title{Tune and Train RobustTuneC Support Vector Machine(SVM)}
+\title{Tune and Train RobustTuneC Support Vector Machine (SVM)}
 \usage{
 tuneandtrainRobustTuneCSVM(
   data,
@@ -14,22 +14,35 @@ tuneandtrainRobustTuneCSVM(
 )
 }
 \arguments{
-\item{data}{Training data as a data frame. The first column should be the response variable.}
+\item{data}{A data frame containing the training data. The first column should be the response variable (factor), and the remaining columns should be the predictor variables.}
 
-\item{dataext}{External validation data as a data frame. The first column should be the response variable.}
+\item{dataext}{A data frame containing the external validation data. The first column should be the response variable (factor), and the remaining columns should be the predictor variables.}
 
-\item{seed}{Random seed for reproducibility. Default is 123.}
+\item{seed}{An integer specifying the random seed for reproducibility. Default is 123.}
 
-\item{kernel}{The kernel type to be used in the algorithm. It can be "linear", "polynomial", "radial", or "sigmoid". Default is "linear".}
+\item{kernel}{A character string specifying the kernel type to be used in the SVM. It can be "linear", "polynomial", "radial", or "sigmoid". Default is "linear".}
 
-\item{cost_seq}{A sequence of cost values to consider for cross-validation. Default is `2^(-15:15)`.}
+\item{cost_seq}{A numeric vector of cost values to be evaluated. Default is `2^(-15:15)`.}
 
-\item{scale}{A logical vector indicating the variables to be scaled. Default is `FALSE`.}
+\item{scale}{A logical value indicating whether to scale the predictor variables. Default is `FALSE`.}
 }
 \value{
-A list containing the best cost (`best_cost`) and the final trained model (`best_model`).
+A list containing the best cost value (`best_cost`) and the final trained model (`best_model`).
 }
 \description{
-This function tunes and trains a SVM classifier with "RobustTuneC" method, using 5-fold cross-validation 
-and selects the best model based on AUC.
+This function tunes and trains an SVM classifier using the "RobustTuneC" method. The function 
+uses 5-fold cross-validation to select the best model based on AUC (Area Under the Curve).
+}
+\examples{
+\dontrun{
+# Load sample data
+data(sample_data_train)
+data(sample_data_extern)
+
+# Example usage
+result <- tuneandtrainRobustTuneCSVM(sample_data_train, sample_data_extern, seed = 123, 
+                                     kernel = "linear", cost_seq = 2^(-15:15), scale = FALSE)
+result$best_cost
+result$best_model
+}
 }

@@ -2,16 +2,16 @@
 % Please edit documentation in R/functions.R
 \name{tuneandtrainExt}
 \alias{tuneandtrainExt}
-\title{Tune and Train by tuning method Ext}
+\title{Tune and Train by Tuning Method Ext}
 \usage{
 tuneandtrainExt(data, dataext, classifier, ...)
 }
 \arguments{
-\item{data}{Training data as a data frame. The first column should be the response variable.}
+\item{data}{A data frame containing the training data. The first column should be the response variable (factor), and the remaining columns should be the predictor variables.}
 
-\item{dataext}{External validation data as a data frame. The first column should be the response variable.}
+\item{dataext}{A data frame containing the external validation data. The first column should be the response variable (factor), and the remaining columns should be the predictor variables.}
 
-\item{classifier}{The classifier to use. Must be one of 'boosting', 'rf', 'lasso', 'ridge', 'svm'.}
+\item{classifier}{A character string specifying the classifier to use. Must be one of 'boosting', 'rf', 'lasso', 'ridge', or 'svm'.}
 
 \item{...}{Additional arguments to pass to the specific classifier function.}
 }
@@ -19,5 +19,23 @@ tuneandtrainExt(data, dataext, classifier, ...)
 A list containing the results from the specific classifier tuning and training function.
 }
 \description{
-This function tunes and trains a specified classifier using the appropriate method and data.
+This function tunes and trains a specified classifier using an external validation dataset. The function selects 
+the appropriate tuning and training function based on the specified classifier.
+}
+\examples{
+\dontrun{
+# Load sample data
+data(sample_data_train)
+data(sample_data_extern)
+
+# Example usage with Random Forest
+result_rf <- tuneandtrainExt(sample_data_train, sample_data_extern, classifier = "rf", num.trees = 500)
+result_rf$best_min.node.size
+result_rf$best_model
+
+# Example usage with SVM
+result_svm <- tuneandtrainExt(sample_data_train, sample_data_extern, classifier = "svm", kernel = "linear", cost_seq = 2^(-15:15))
+result_svm$best_cost
+result_svm$best_model
+}
 }

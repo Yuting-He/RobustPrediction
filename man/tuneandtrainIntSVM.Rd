@@ -14,7 +14,7 @@ tuneandtrainIntSVM(
 )
 }
 \arguments{
-\item{data}{A data frame containing the training data. The first column should be the response variable (factor) and the remaining columns should be the predictor variables.}
+\item{data}{A data frame containing the training data. The first column should be the response variable (factor), and the remaining columns should be the predictor variables.}
 
 \item{kernel}{A character string specifying the kernel type to be used in the SVM. Default is "linear".}
 
@@ -30,13 +30,23 @@ tuneandtrainIntSVM(
 A list containing the best cost value (`best_cost`), the final trained model (`best_model`), and the AUC on the training data (`AUC_Train`).
 }
 \description{
-This function tunes and trains an SVM classifier using internal cross-validation.
+This function tunes and trains an SVM classifier using internal cross-validation. The function evaluates 
+different cost values and selects the best model based on AUC (Area Under the Curve).
 }
 \examples{
 \dontrun{
-# Example usage:
-data <- ... # your training data
-result <- tuneandtrainIntSVM(data, kernel = "linear", cost_seq = 2^(-15:15), scale = FALSE, nfolds = 5, seed = 123)
+# Load sample data
+data(sample_data_train)
+
+# Example usage
+result <- tuneandtrainIntSVM(
+  sample_data_train,
+  kernel = "linear",
+  cost_seq = 2^(-15:15),
+  scale = FALSE,
+  nfolds = 5,
+  seed = 123
+)
 result$best_cost
 result$best_model
 result$AUC_Train

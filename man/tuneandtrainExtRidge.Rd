@@ -2,31 +2,34 @@
 % Please edit documentation in R/functions.R
 \name{tuneandtrainExtRidge}
 \alias{tuneandtrainExtRidge}
-\title{Tune and Train External Ridge Regression}
+\title{Tune and Train External Ridge}
 \usage{
 tuneandtrainExtRidge(data, dataext, maxit = 120000, nlambda = 100)
 }
 \arguments{
-\item{data}{A data frame containing the training data. The first column should be the response variable (factor) and the remaining columns should be the predictor variables.}
+\item{data}{A data frame containing the training data. The first column should be the response variable (factor), and the remaining columns should be the predictor variables.}
 
-\item{dataext}{A data frame containing the external validation data. The first column should be the response variable (factor) and the remaining columns should be the predictor variables.}
+\item{dataext}{A data frame containing the external validation data. The first column should be the response variable (factor), and the remaining columns should be the predictor variables.}
 
 \item{maxit}{An integer specifying the maximum number of iterations. Default is 120000.}
 
-\item{nlambda}{An integer specifying the number of lambda values to use in the Ridge model.}
+\item{nlambda}{An integer specifying the number of lambda values to use in the Ridge model. Default is 100.}
 }
 \value{
-A list containing the best lambda value (`best_lambda`), the final trained model (`best_model`), the AUC on the training data (`AUC_Train`).
+A list containing the best lambda value (`best_lambda`), the final trained model (`best_model`), and the AUC on the training data (`AUC_Train`).
 }
 \description{
-This function tunes and trains a Ridge Regression classifier using an external validation dataset.
+This function tunes and trains a Ridge classifier using an external validation dataset. The function 
+selects the best model based on AUC (Area Under the Curve) and provides additional metrics.
 }
 \examples{
 \dontrun{
-# Example usage:
-data <- ... # your training data
-dataext <- ... # your external validation data
-result <- tuneandtrainExtRidge(data, dataext)
+# Load sample data
+data(sample_data_train)
+data(sample_data_extern)
+
+# Example usage
+result <- tuneandtrainExtRidge(sample_data_train, sample_data_extern, maxit = 120000, nlambda = 100)
 result$best_lambda
 result$best_model
 result$AUC_Train

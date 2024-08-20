@@ -4,30 +4,35 @@
 \name{RobustPrediction}
 \alias{RobustPrediction}
 \alias{RobustPrediction-package}
-\title{Package Title: Robust Prediction Package}
+\title{Package Title: Robust Prediction and Tuning Package}
 \description{
-A brief (one-line) description of what the package does.
+This package provides robust parameter tuning and predictive modeling techniques.
 }
 \details{
-A more detailed description of the package, its purpose, and the main
-functionalities it provides. This section can include several lines.
+The RobustPrediction package allows users to build and tune classifiers using various methods, 
+including RobustTuneC, internal, and external tuning approaches. The package supports a range of 
+classifiers, such as boosting, lasso, ridge, random forest, and SVM. It is designed for users 
+who need reliable and accurate models, particularly in scenarios where robust parameter tuning is essential.
 
 
-This package provides tools for building robust predictive models.
-It includes functions for model training, validation, and prediction.
+This package provides comprehensive tools for robust parameter tuning and predictive modeling.
+It includes functions for tuning (via RobustTuneC, internal, and external methods), training, 
+and predicting outcomes with various classifiers.
 }
 \section{Dependencies}{
 
-This package requires the following packages: \code{caret}, \code{randomForest}, \code{glmnet}.
+This package requires the following packages: \code{caret}, \code{randomForest}, \code{glmnet}, \code{e1071}.
 }
 
 \examples{
 # Example usage:
-data(iris)
-model <- train_model(iris)
-predictions <- predict_outcome(model, newdata)
+data(sample_data_train)
+data(sample_data_extern)
+res <- tuneandtrain(sample_data_train, sample_data_extern, tuningmethod = "robusttunec", classifier = "boosting")
 
 }
 \references{
-Doe, J. (2024). \emph{Robust Predictive Modeling Techniques}. Journal of Machine Learning.
+Hubert, M., Rousseeuw, P.J., & Verdonck, T. (2020). Robust PCA for skewed data 
+and its outlier map. \emph{Journal of Classification}, \emph{37}(2), 189-218. 
+doi:10.1007/s00357-020-09368-z.
 }

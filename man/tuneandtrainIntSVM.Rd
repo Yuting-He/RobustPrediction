@@ -27,7 +27,7 @@ tuneandtrainIntSVM(
 \item{seed}{An integer specifying the random seed for reproducibility. Default is 123.}
 }
 \value{
-A list containing the best cost value (`best_cost`), the final trained model (`best_model`), and the AUC on the training data (`AUC_Train`).
+A list containing the best cost value (`best_cost`), the final trained model (`best_model`), and the AUC on the training data (`final_auc`).
 }
 \description{
 This function tunes and trains an SVM classifier using internal cross-validation. The function evaluates 
@@ -49,6 +49,6 @@ result <- tuneandtrainIntSVM(
 )
 result$best_cost
 result$best_model
-result$AUC_Train
+result$final_auc
 }
 }

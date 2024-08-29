@@ -24,7 +24,7 @@
 #' result <- tuneandtrainExtBoost(sample_data_train, sample_data_extern, mstop_seq = mstop_seq, nu = 0.1)
 #' result$best_mstop
 #' result$best_model
-#' result$best_auc
+#' result$final_auc
 #' }
 
 tuneandtrainExtBoost <- function(data, dataext, mstop_seq = seq(5, 1000, by = 5), nu = 0.1) {

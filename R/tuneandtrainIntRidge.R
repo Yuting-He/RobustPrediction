@@ -9,7 +9,7 @@
 #' @param nfolds An integer specifying the number of folds for cross-validation. Default is 5.
 #' @param seed An integer specifying the random seed for reproducibility. Default is 123.
 #'
-#' @return A list containing the best lambda value (`best_lambda`), the final trained model (`best_model`), and the AUC on the training data (`AUC_Train`).
+#' @return A list containing the best lambda value (`best_lambda`), the final trained model (`best_model`), and the AUC on the training data (`final_auc`).
 #' @import glmnet
 #' @import pROC
 #' @export
@@ -23,7 +23,7 @@
 #' result <- tuneandtrainIntRidge(sample_data_train, maxit = 120000, nlambda = 200, nfolds = 5, seed = 123)
 #' result$best_lambda
 #' result$best_model
-#' result$AUC_Train
+#' result$final_auc
 #' }
 tuneandtrainIntRidge <- function(data, maxit = 120000, nlambda = 200, nfolds = 5, seed = 123) {
   # Load necessary libraries
@@ -84,7 +84,7 @@ tuneandtrainIntRidge <- function(data, maxit = 120000, nlambda = 200, nfolds = 5
   res <- list(
     best_lambda = best_lambda,
     best_model = final_model,
-    AUC_Train = AUC_Train
+    final_auc = AUC_Train
   )
   
   # Set class

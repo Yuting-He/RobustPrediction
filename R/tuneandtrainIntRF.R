@@ -8,7 +8,7 @@
 #' @param nfolds An integer specifying the number of folds for cross-validation. Default is 5.
 #' @param seed An integer specifying the random seed for reproducibility. Default is 123.
 #'
-#' @return A list containing the best `min.node.size` value, the final trained model (`best_model`), and the AUC on the training data (`AUC_Train`).
+#' @return A list containing the best `min.node.size` value, the final trained model (`best_model`), and the AUC on the training data (`final_auc`).
 #' @import ranger
 #' @import mlr
 #' @import pROC
@@ -23,7 +23,7 @@
 #' result <- tuneandtrainIntRF(sample_data_train, num.trees = 500, nfolds = 5, seed = 123)
 #' result$best_min.node.size
 #' result$best_model
-#' result$AUC_Train
+#' result$final_auc
 #' }
 tuneandtrainIntRF <- function(data, num.trees = 500, nfolds = 5, seed = 123) {
   # Load necessary libraries
@@ -94,7 +94,7 @@ tuneandtrainIntRF <- function(data, num.trees = 500, nfolds = 5, seed = 123) {
   res <- list(
     best_min.node.size = best_min.node.size,
     best_model = final_model,
-    AUC_Train = AUC_Train
+    final_auc = AUC_Train
   )
   
   # Set class

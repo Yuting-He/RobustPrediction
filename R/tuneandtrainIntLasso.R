@@ -8,7 +8,7 @@
 #' @param nlambda An integer specifying the number of lambda values to use in the Lasso model. Default is 200.
 #' @param nfolds An integer specifying the number of folds for cross-validation. Default is 5.
 #'
-#' @return A list containing the best lambda value (`best_lambda`), the final trained model (`best_model`), the AUC on the training data (`AUC_Train`), and the number of active coefficients (`active_set_Train`).
+#' @return A list containing the best lambda value (`best_lambda`), the final trained model (`best_model`), the AUC on the training data (`final_auc`), and the number of active coefficients (`active_set_Train`).
 #' @import glmnet
 #' @import pROC
 #' @export
@@ -22,7 +22,7 @@
 #' result <- tuneandtrainIntLasso(sample_data_train, maxit = 120000, nlambda = 200, nfolds = 5)
 #' result$best_lambda
 #' result$best_model
-#' result$AUC_Train
+#' result$final_auc
 #' result$active_set_Train
 #' }
 
@@ -83,7 +83,7 @@ tuneandtrainIntLasso <- function(data, maxit = 120000, nlambda = 200, nfolds = 5
   res <- list(
     best_lambda = best_lambda,
     best_model = final_model,
-    AUC_Train = AUC_Train,
+    final_auc = AUC_Train,
     active_set_Train = active_set_Train
   )
   

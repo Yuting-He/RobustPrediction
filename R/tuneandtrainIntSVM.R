@@ -10,7 +10,7 @@
 #' @param nfolds An integer specifying the number of folds for cross-validation. Default is 5.
 #' @param seed An integer specifying the random seed for reproducibility. Default is 123.
 #'
-#' @return A list containing the best cost value (`best_cost`), the final trained model (`best_model`), and the AUC on the training data (`AUC_Train`).
+#' @return A list containing the best cost value (`best_cost`), the final trained model (`best_model`), and the AUC on the training data (`final_auc`).
 #' @import e1071
 #' @import mlr
 #' @import pROC
@@ -32,7 +32,7 @@
 #' )
 #' result$best_cost
 #' result$best_model
-#' result$AUC_Train
+#' result$final_auc
 #' }
 tuneandtrainIntSVM <- function(data, kernel = "linear", cost_seq = 2^(-15:15), scale = FALSE, nfolds = 5, seed = 123) {
   # Load necessary libraries
@@ -102,7 +102,7 @@ tuneandtrainIntSVM <- function(data, kernel = "linear", cost_seq = 2^(-15:15), s
   res <- list(
     best_cost = best_cost,
     best_model = final_model,
-    AUC_Train = AUC_Train
+    final_auc = AUC_Train
   )
   
   # Set class

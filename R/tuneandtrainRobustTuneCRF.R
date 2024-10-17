@@ -3,17 +3,21 @@
 #' This function tunes and trains a Random Forest classifier using the "RobustTuneC" method. The function 
 #' uses K-fold cross-validation (with K specified by the user) to select the best model based on AUC (Area Under the Curve).
 #'
-#' @param data A data frame containing the training data. The first column should be the response variable (factor), and the remaining columns should be the predictor variables.
-#' @param dataext A data frame containing the external validation data. The first column should be the response variable (factor), and the remaining columns should be the predictor variables.
+#' @param data A data frame containing the training data. The first column should be the response variable (factor), 
+#'   and the remaining columns should be the predictor variables.
+#' @param dataext A data frame containing the external validation data. The first column should be the response 
+#'   variable (factor), and the remaining columns should be the predictor variables.
 #' @param K Number of folds to use in cross-validation. Default is 5.
 #' @param num.trees An integer specifying the number of trees to grow in the Random Forest. Default is 500.
 #'
-#' @return A list containing the best minimum node size (`best_min_node_size`), the final trained model (`best_model`), and the AUC of the final model (`final_auc`).
+#' @return A list containing the best minimum node size (`best_min_node_size`), 
+#'   the final trained model (`best_model`), and the AUC of the final model (`final_auc`).
 #' @export
 #'
 #' @import mlr
 #' @import ranger
 #' @import pROC
+#' @importFrom stats predict
 #'
 #' @examples
 #' \dontrun{
@@ -62,14 +66,15 @@ tuneandtrainRobustTuneCRF <- function(data, dataext, K = 5, num.trees = 500) {
       for (i in 1:length(min.node.size_grid)) {
         # fit RF
         
-        task = makeClassifTask(data = Combined_data, target = "y", check.data = FALSE)
-        lrn = makeLearner("classif.ranger", predict.type = "prob", num.threads = 1, num.trees = num.trees, min.node.size = min.node.size_grid[i], save.memory = TRUE)
+        task = mlr::makeClassifTask(data = Combined_data, target = "y", check.data = FALSE)
+        lrn = mlr::makeLearner("classif.ranger", predict.type = "prob", num.threads = 1, 
+                          num.trees = num.trees, min.node.size = min.node.size_grid[i], save.memory = TRUE)
         
         train.set = 1:nrow(XTrain)
         test.set = (nrow(XTrain) + 1):nrow(Combined_data)
         
-        model = train(lrn, task, subset = train.set)
-        pred = predict(model, task = task, subset = test.set)
+        model = mlr::train(lrn, task, subset = train.set)
+        pred = stats::predict(model, task = task, subset = test.set)
         
         auc_CV[i, j] <- 1 - performance(pred, measures = list(mlr::auc))
       }
@@ -105,13 +110,14 @@ tuneandtrainRobustTuneCRF <- function(data, dataext, K = 5, num.trees = 500) {
     train.set = 1:nrow(data)
     extern.set = (nrow(data) + 1):nrow(CombinedTrainExtern)
     
-    task_Test = makeClassifTask(data = CombinedTrainExtern, target = "y", check.data = FALSE)
-    lrn_Test.c = makeLearner("classif.ranger", predict.type = "prob", num.threads = 1, num.trees = num.trees, min.node.size = min.node.size.c, save.memory = TRUE)
+    task_Test = mlr::makeClassifTask(data = CombinedTrainExtern, target = "y", check.data = FALSE)
+    lrn_Test.c = mlr::makeLearner("classif.ranger", predict.type = "prob", num.threads = 1, 
+                             num.trees = num.trees, min.node.size = min.node.size.c, save.memory = TRUE)
     
-    model_Test.c = train(lrn_Test.c, task_Test, subset = train.set)
-    pred_Test.c = predict(model_Test.c, task = task_Test, subset = extern.set)
+    model_Test.c = mlr::train(lrn_Test.c, task_Test, subset = train.set)
+    pred_Test.c = stats::predict(model_Test.c, task = task_Test, subset = extern.set)
     
-    AUC_Test.c[i] <- performance(pred_Test.c, measures = list(mlr::auc))
+    AUC_Test.c[i] <- mlr::performance(pred_Test.c, measures = list(mlr::auc))
     
     i <- i + 1
   }
@@ -127,20 +133,18 @@ tuneandtrainRobustTuneCRF <- function(data, dataext, K = 5, num.trees = 500) {
     min.node.size.c <- min.node.size_grid[max(which(AUC_mean <= cvmin), na.rm = TRUE)]
   }
   
-  # train the final model
-  data <- as.data.frame(data)  # Ensure data is a data frame
-  data$y <- as.factor(data$y)  # Ensure the target variable is a factor
-  final_model <- ranger(
-    dependent.variable.name = "y", 
-    data = data, 
-    num.trees = num.trees, 
-    min.node.size = min.node.size.c, 
-    probability = TRUE
-  )
+  # train the final model using the same method as in tuning
+  CombinedTrainExtern <- rbind(data, dataext)
+  CombinedTrainExtern$y <- as.factor(CombinedTrainExtern$y)  # Ensure the target variable is a factor
+  task_final <- mlr::makeClassifTask(data = CombinedTrainExtern, target = "y", check.data = FALSE)
+  learner_final <- mlr::makeLearner("classif.ranger", predict.type = "prob", 
+                               num.trees = num.trees, min.node.size = min.node.size.c, save.memory = TRUE)
+  
+  final_model <- mlr::train(learner_final, task_final, subset = 1:nrow(data))  # Train the model on full data
   
   # Calculate AUC on the external validation set
-  final_predictions <- predict(final_model, data = dataext, type = "response")$predictions[,2]
-  final_auc <- auc(response = as.factor(dataext[,1]), predictor = final_predictions)
+  pred_final <- stats::predict(final_model, newdata = dataext)
+  final_auc <- mlr::performance(pred_final, measures = list(mlr::auc))
   
   # return the result
   res <- list(

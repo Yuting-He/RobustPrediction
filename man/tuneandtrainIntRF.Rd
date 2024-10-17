@@ -7,7 +7,8 @@
 tuneandtrainIntRF(data, num.trees = 500, nfolds = 5, seed = 123)
 }
 \arguments{
-\item{data}{A data frame containing the training data. The first column should be the response variable (factor), and the remaining columns should be the predictor variables.}
+\item{data}{A data frame containing the training data. The first column should be the response variable (factor), 
+and the remaining columns should be the predictor variables.}
 
 \item{num.trees}{An integer specifying the number of trees in the Random Forest. Default is 500.}
 
@@ -16,7 +17,8 @@ tuneandtrainIntRF(data, num.trees = 500, nfolds = 5, seed = 123)
 \item{seed}{An integer specifying the random seed for reproducibility. Default is 123.}
 }
 \value{
-A list containing the best `min.node.size` value, the final trained model (`best_model`), and the AUC on the training data (`final_auc`).
+A list containing the best `min.node.size` value (`best_min_node_size`), 
+  the final trained model (`best_model`), and the AUC on the training data (`final_auc`).
 }
 \description{
 This function tunes and trains a Random Forest classifier using internal cross-validation. The function evaluates 
@@ -29,7 +31,7 @@ data(sample_data_train)
 
 # Example usage
 result <- tuneandtrainIntRF(sample_data_train, num.trees = 500, nfolds = 5, seed = 123)
-result$best_min.node.size
+result$best_min_node_size
 result$best_model
 result$final_auc
 }

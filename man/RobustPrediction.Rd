@@ -4,42 +4,71 @@
 \name{RobustPrediction}
 \alias{RobustPrediction}
 \alias{RobustPrediction-package}
-\title{Package Title: Robust Prediction and Tuning Package}
+\title{Package Title: Robust Tuning and Training for Cross-Source Prediction}
 \description{
 This package provides robust parameter tuning and predictive modeling techniques.
 }
 \details{
-The RobustPrediction package allows users to build and tune classifiers using various methods, 
-including RobustTuneC, internal, and external tuning approaches. The package supports a range of 
-classifiers, such as boosting, lasso, ridge, random forest, and SVM. It is designed for users 
-who need reliable and accurate models, particularly in scenarios where robust parameter tuning is essential.
+The RobustPrediction package helps users build and tune classifiers using methods such as 
+RobustTuneC, internal, and external tuning approaches. The package supports classifiers 
+such as boosting, lasso, ridge, random forest, and SVM. It is intended for scenarios 
+where parameter tuning across data sources is important.
 
 
-This package provides comprehensive tools for robust parameter tuning and predictive modeling.
-It includes functions for tuning (via RobustTuneC, internal, and external methods), training, 
-and predicting outcomes with various classifiers.
+The RobustPrediction package provides comprehensive tools for robust parameter tuning 
+and predictive modeling, particularly for cross-source prediction tasks. 
+
+The package includes functions for tuning model parameters using three methods:
+- **Internal tuning**: Standard cross-validation on the training data to select the best parameters.
+- **External tuning**: Parameter tuning based on an external dataset that is independent of the training data.
+- **RobustTuneC**: A method designed to combine internal and external tuning for better performance in cross-source scenarios.
+
+The package supports Lasso, Ridge, Random Forest, Boosting, and SVM classifiers. 
+These models can be trained and tuned using the provided methods, and the package includes 
+the model's AUC (Area Under the Curve) value to help users evaluate prediction performance.
+
+It is particularly useful when the data to be predicted comes from a different source than the training data, 
+where variability between datasets may require more robust parameter tuning techniques. The methods provided in 
+this package may help reduce overfitting the training data distribution and improve model generalization across 
+different data sources.
 }
 \section{Dependencies}{
 
-This package requires the following packages: \code{caret}, \code{randomForest}, \code{glmnet}, \code{e1071}.
+This package requires the following packages: \code{e1071}, \code{glmnet}, \code{mboost}, \code{mlr}, 
+\code{pROC}, \code{ranger}.
 }
 
 \examples{
 # Example usage:
 data(sample_data_train)
 data(sample_data_extern)
-res <- tuneandtrain(sample_data_train, sample_data_extern, tuningmethod = "robusttunec", classifier = "boosting")
+res <- tuneandtrain(sample_data_train, sample_data_extern, tuningmethod = "robusttunec", 
+  classifier = "boosting")
 
 }
 \references{
-Hubert, M., Rousseeuw, P.J., & Verdonck, T. (2020). Robust PCA for skewed data 
-and its outlier map. \emph{Journal of Classification}, \emph{37}(2), 189-218. 
-doi:10.1007/s00357-020-09368-z.
+Ellenbach, N., Boulesteix, A.-L., Bischl, B., Unger, K., & Hornung, R. (2021). 
+Improved outcome prediction across data sources through robust parameter tuning. 
+\emph{Journal of Classification}, \emph{38}, 212-231. 
+Springer. doi:10.1007/s00357-021-09369-y.
 }
 \seealso{
 Useful links:
 \itemize{
   \item \url{https://github.com/Yuting-He/RobustPrediction}
+}
+
+}
+\author{
+\strong{Maintainer}: Yuting He \email{Yuting.He@campus.lmu.de}
+
+Other contributors:
+\itemize{
+  \item Nicole Ellenbach [contributor]
+  \item Anne-Laure Boulesteix [contributor]
+  \item Bernd Bischl [contributor]
+  \item Kristian Unger [contributor]
+  \item Roman Hornung [contributor]
 }
 
 }

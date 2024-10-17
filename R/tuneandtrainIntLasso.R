@@ -3,14 +3,17 @@
 #' This function tunes and trains a Lasso classifier using internal cross-validation. The function evaluates 
 #' different lambda values and selects the best model based on AUC (Area Under the Curve).
 #'
-#' @param data A data frame containing the training data. The first column should be the response variable (factor), and the remaining columns should be the predictor variables.
+#' @param data A data frame containing the training data. The first column should be the response variable (factor), 
+#'   and the remaining columns should be the predictor variables.
 #' @param maxit An integer specifying the maximum number of iterations. Default is 120000.
 #' @param nlambda An integer specifying the number of lambda values to use in the Lasso model. Default is 200.
 #' @param nfolds An integer specifying the number of folds for cross-validation. Default is 5.
 #'
-#' @return A list containing the best lambda value (`best_lambda`), the final trained model (`best_model`), the AUC on the training data (`final_auc`), and the number of active coefficients (`active_set_Train`).
+#' @return A list containing the best lambda value (`best_lambda`), the final trained model (`best_model`), 
+#'   the AUC on the training data (`final_auc`), and the number of active coefficients (`active_set_Train`).
 #' @import glmnet
 #' @import pROC
+#' @importFrom stats predict
 #' @export
 #'
 #' @examples
@@ -27,9 +30,6 @@
 #' }
 
 tuneandtrainIntLasso <- function(data, maxit = 120000, nlambda = 200, nfolds = 5) {
-  # Load necessary libraries
-  library(glmnet)
-  library(pROC)
   
   # Ensure data is in data frame format
   data <- as.data.frame(data)
@@ -38,8 +38,8 @@ tuneandtrainIntLasso <- function(data, maxit = 120000, nlambda = 200, nfolds = 5
   X <- as.matrix(data[, -1])
   y <- as.factor(data[, 1])
   
-  # Fit initial Lasso model to obtain lambda sequence
-  fit_Lasso <- glmnet(x = X, y = y, family = "binomial", maxit = maxit, nlambda = nlambda, standardize = TRUE)
+  # Fit initial Lasso model to obtain lambda sequence using glmnet package
+  fit_Lasso <- glmnet::glmnet(x = X, y = y, family = "binomial", maxit = maxit, nlambda = nlambda, standardize = TRUE)
   lamseq <- fit_Lasso$lambda
   
   # Cross-validation
@@ -55,11 +55,12 @@ tuneandtrainIntLasso <- function(data, maxit = 120000, nlambda = 200, nfolds = 5
     if (length(unique(yTest)) == 1) {
       AUC_CV[, j] <- NA
     } else {
-      fit_Lasso_CV <- glmnet(x = XTrain, y = yTrain, family = "binomial", maxit = maxit, lambda = lamseq, standardize = TRUE)
-      pred_Lasso_CV <- predict(fit_Lasso_CV, newx = XTest, s = lamseq, type = "response")
+      fit_Lasso_CV <- glmnet::glmnet(x = XTrain, y = yTrain, family = "binomial", 
+                                     maxit = maxit, lambda = lamseq, standardize = TRUE)
+      pred_Lasso_CV <- stats::predict(fit_Lasso_CV, newx = XTest, s = lamseq, type = "response")
       
       for (i in 1:ncol(pred_Lasso_CV)) {
-        AUC_CV[i, j] <- auc(response = yTest, predictor = pred_Lasso_CV[, i])
+        AUC_CV[i, j] <- pROC::auc(response = yTest, predictor = pred_Lasso_CV[, i])
       }
     }
   }
@@ -69,15 +70,16 @@ tuneandtrainIntLasso <- function(data, maxit = 120000, nlambda = 200, nfolds = 5
   best_lambda_idx <- which.max(mean_AUC)
   best_lambda <- lamseq[best_lambda_idx]
   
-  # Final model training with the best lambda
-  final_model <- glmnet(x = X, y = y, family = "binomial", maxit = maxit, lambda = best_lambda, standardize = TRUE)
+  # Final model training with the best lambda using glmnet package
+  final_model <- glmnet::glmnet(x = X, y = y, family = "binomial", 
+                                maxit = maxit, lambda = best_lambda, standardize = TRUE)
   
-  # Determine AUC on the full training set with the best lambda
-  pred_Lasso_Train <- predict(final_model, newx = X, s = best_lambda, type = "response")
-  AUC_Train <- auc(response = y, predictor = as.numeric(pred_Lasso_Train))
+  # Determine AUC on the full training set with the best lambda using pROC package
+  pred_Lasso_Train <- stats::predict(final_model, newx = X, s = best_lambda, type = "response")
+  AUC_Train <- pROC::auc(response = y, predictor = as.numeric(pred_Lasso_Train))
   
   # Count the number of active coefficients
-  active_set_Train <- length(coef(final_model, s = best_lambda)@x)
+  active_set_Train <- length(methods::coef(final_model, s = best_lambda)@x)
   
   # Return results
   res <- list(

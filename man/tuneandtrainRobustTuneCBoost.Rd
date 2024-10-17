@@ -19,12 +19,14 @@ tuneandtrainRobustTuneCBoost(
 
 \item{K}{Number of folds to use in cross-validation. Default is 5.}
 
-\item{mstop_seq}{A sequence of boosting iterations to consider. Default is a sequence starting at 5 and increasing by 5 each time, up to 1000.}
+\item{mstop_seq}{A sequence of boosting iterations to consider. Default is a sequence starting at 5 and 
+increasing by 5 each time, up to 1000.}
 
 \item{nu}{Learning rate for the boosting algorithm. Default is 0.1.}
 }
 \value{
-A list containing the best number of boosting iterations (`best_mstop`), the final trained model (`best_model`), and the AUC of the final model (`final_auc`).
+A list containing the best number of boosting iterations (`best_mstop`), 
+  the final trained model (`best_model`), and the AUC of the final model (`final_auc`).
 }
 \description{
 This function tunes and trains a Boosting classifier using the "RobustTuneC" method. It performs K-fold cross-validation

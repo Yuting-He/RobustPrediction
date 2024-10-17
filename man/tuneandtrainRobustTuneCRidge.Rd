@@ -13,9 +13,11 @@ tuneandtrainRobustTuneCRidge(
 )
 }
 \arguments{
-\item{data}{A data frame containing the training data. The first column should be the response variable (factor), and the remaining columns should be the predictor variables.}
+\item{data}{A data frame containing the training data. The first column should be the response variable (factor), 
+and the remaining columns should be the predictor variables.}
 
-\item{dataext}{A data frame containing the external validation data. The first column should be the response variable (factor), and the remaining columns should be the predictor variables.}
+\item{dataext}{A data frame containing the external validation data. The first column should be the response 
+variable (factor), and the remaining columns should be the predictor variables.}
 
 \item{K}{Number of folds to use in cross-validation. Default is 5.}
 
@@ -24,7 +26,8 @@ tuneandtrainRobustTuneCRidge(
 \item{nlambda}{The number of lambda values to use for cross-validation. Default is 100.}
 }
 \value{
-A list containing the best lambda value (`best_lambda`), the final trained model (`best_model`), and the AUC of the final model (`final_auc`).
+A list containing the best lambda value (`best_lambda`), the final trained model (`best_model`), 
+  and the AUC of the final model (`final_auc`).
 }
 \description{
 This function tunes and trains a Ridge classifier using the "RobustTuneC" method. The function 
@@ -37,7 +40,8 @@ data(sample_data_train)
 data(sample_data_extern)
 
 # Example usage
-result <- tuneandtrainRobustTuneCRidge(sample_data_train, sample_data_extern, K = 5, maxit = 120000, nlambda = 100)
+result <- tuneandtrainRobustTuneCRidge(sample_data_train, sample_data_extern, 
+  K = 5, maxit = 120000, nlambda = 100)
 result$best_lambda
 result$best_model
 result$final_auc

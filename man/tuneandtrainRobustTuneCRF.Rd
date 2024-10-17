@@ -7,16 +7,19 @@
 tuneandtrainRobustTuneCRF(data, dataext, K = 5, num.trees = 500)
 }
 \arguments{
-\item{data}{A data frame containing the training data. The first column should be the response variable (factor), and the remaining columns should be the predictor variables.}
+\item{data}{A data frame containing the training data. The first column should be the response variable (factor), 
+and the remaining columns should be the predictor variables.}
 
-\item{dataext}{A data frame containing the external validation data. The first column should be the response variable (factor), and the remaining columns should be the predictor variables.}
+\item{dataext}{A data frame containing the external validation data. The first column should be the response 
+variable (factor), and the remaining columns should be the predictor variables.}
 
 \item{K}{Number of folds to use in cross-validation. Default is 5.}
 
 \item{num.trees}{An integer specifying the number of trees to grow in the Random Forest. Default is 500.}
 }
 \value{
-A list containing the best minimum node size (`best_min_node_size`), the final trained model (`best_model`), and the AUC of the final model (`final_auc`).
+A list containing the best minimum node size (`best_min_node_size`), 
+  the final trained model (`best_model`), and the AUC of the final model (`final_auc`).
 }
 \description{
 This function tunes and trains a Random Forest classifier using the "RobustTuneC" method. The function 

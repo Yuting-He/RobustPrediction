@@ -7,14 +7,17 @@
 tuneandtrainIntBoost(data, mstop_seq = seq(5, 1000, by = 5), nu = 0.1)
 }
 \arguments{
-\item{data}{A data frame containing the training data. The first column should be the response variable (factor), and the remaining columns should be the predictor variables.}
+\item{data}{A data frame containing the training data. The first column should be the response variable (factor), 
+and the remaining columns should be the predictor variables.}
 
-\item{mstop_seq}{A numeric vector of boosting iterations to be evaluated. Default is a sequence from 5 to 1000 with a step of 5.}
+\item{mstop_seq}{A numeric vector of boosting iterations to be evaluated. Default is a sequence 
+from 5 to 1000 with a step of 5.}
 
 \item{nu}{A numeric value for the learning rate. Default is 0.1.}
 }
 \value{
-A list containing the best number of boosting iterations (`best_mstop`), the final Boosting classifier model (`best_model`) and the AUC on the training data (`final_auc`).
+A list containing the best number of boosting iterations (`best_mstop`), 
+  the final Boosting classifier model (`best_model`) and the AUC on the training data (`final_auc`).
 }
 \description{
 This function tunes and trains a Boosting classifier using internal cross-validation. The function evaluates 

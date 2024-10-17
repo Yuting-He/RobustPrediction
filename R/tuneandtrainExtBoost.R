@@ -3,14 +3,21 @@
 #' This function tunes and trains a Boosting classifier using an external validation dataset. The function 
 #' evaluates different numbers of boosting iterations and selects the best model based on AUC (Area Under the Curve).
 #'
-#' @param data A data frame containing the training data. The first column should be the response variable (factor), and the remaining columns should be the predictor variables.
-#' @param dataext A data frame containing the external validation data. The first column should be the response variable (factor), and the remaining columns should be the predictor variables.
-#' @param mstop_seq A numeric vector of boosting iterations to be evaluated. Default is a sequence starting at 5 and increasing by 5 each time, up to 1000.
+#' @param data A data frame containing the training data. The first column should be the 
+#'   response variable (factor), and the remaining columns should be the predictor 
+#'   variables.
+#' @param dataext A data frame containing the external validation data. The first column 
+#'   should be the response variable (factor), and the remaining columns should be the 
+#'   predictor variables.
+#' @param mstop_seq A numeric vector of boosting iterations to be evaluated. Default is a 
+#'   sequence starting at 5 and increasing by 5 each time, up to 1000.
 #' @param nu A numeric value for the learning rate. Default is 0.1.
 #'
-#' @return A list containing the best number of boosting iterations (`best_mstop`), the final trained model (`best_model`), and the AUC of the final model (`final_auc`).
+#' @return A list containing the best number of boosting iterations (`best_mstop`), 
+#'   the final trained model (`best_model`), and the AUC of the final model (`final_auc`).
 #' @import mboost
 #' @import pROC
+#' @importFrom stats predict
 #' @export
 #'
 #' @examples
@@ -21,16 +28,14 @@
 #'
 #' # Example usage
 #' mstop_seq <- seq(50, 500, by = 50)
-#' result <- tuneandtrainExtBoost(sample_data_train, sample_data_extern, mstop_seq = mstop_seq, nu = 0.1)
+#' result <- tuneandtrainExtBoost(sample_data_train, sample_data_extern, 
+#'   mstop_seq = mstop_seq, nu = 0.1)
 #' result$best_mstop
 #' result$best_model
 #' result$final_auc
 #' }
 
 tuneandtrainExtBoost <- function(data, dataext, mstop_seq = seq(5, 1000, by = 5), nu = 0.1) {
-  # Load necessary libraries
-  library(mboost)
-  library(pROC)
   
   # Ensure data is in data frame format
   data <- as.data.frame(data)
@@ -39,10 +44,11 @@ tuneandtrainExtBoost <- function(data, dataext, mstop_seq = seq(5, 1000, by = 5)
   Train <- data
   Extern <- dataext
   
-  # Fit initial boosting model
-  fit_Boost <- glmboost(x = as.matrix(Train[, -1]), y = as.factor(Train[, 1]),
-                        family = Binomial(), control = boost_control(mstop = max(mstop_seq), nu = nu),
-                        center = FALSE)
+  # Fit initial boosting model using mboost package
+  fit_Boost <- mboost::glmboost(x = as.matrix(Train[, -1]), y = as.factor(Train[, 1]),
+                                family = mboost::Binomial(), 
+                                control = mboost::boost_control(mstop = max(mstop_seq), nu = nu),
+                                center = FALSE)
   
   AUC <- numeric(length(mstop_seq))
   
@@ -50,10 +56,10 @@ tuneandtrainExtBoost <- function(data, dataext, mstop_seq = seq(5, 1000, by = 5)
   for (i in seq_along(mstop_seq)) {
     mseq <- mstop_seq[i]
     # Prediction on external data
-    pred_Boost <- predict(fit_Boost[mseq], newdata = as.matrix(Extern[, -1]), type = "response")
+    pred_Boost <- stats::predict(fit_Boost[mseq], newdata = as.matrix(Extern[, -1]), type = "response")
     # Convert predictions to numeric vector (if not already)
     pred_Boost_numeric <- as.numeric(pred_Boost)
-    # Calculate AUC
+    # Calculate AUC using pROC package
     AUC[i] <- pROC::auc(response = as.factor(Extern[, 1]), predictor = pred_Boost_numeric)
   }
   
@@ -63,9 +69,10 @@ tuneandtrainExtBoost <- function(data, dataext, mstop_seq = seq(5, 1000, by = 5)
   final_auc <- AUC[chosen_model]
   
   # Train the final model with the chosen mstop
-  final_model <- glmboost(x = as.matrix(Train[, -1]), y = as.factor(Train[, 1]),
-                          family = Binomial(), control = boost_control(mstop = chosen_mstop, nu = nu),
-                          center = FALSE)
+  final_model <- mboost::glmboost(x = as.matrix(Train[, -1]), y = as.factor(Train[, 1]),
+                                  family = mboost::Binomial(), 
+                                  control = mboost::boost_control(mstop = chosen_mstop, nu = nu),
+                                  center = FALSE)
   
   # Return the result
   res <- list(

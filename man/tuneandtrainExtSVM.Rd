@@ -13,9 +13,11 @@ tuneandtrainExtSVM(
 )
 }
 \arguments{
-\item{data}{A data frame containing the training data. The first column should be the response variable (factor), and the remaining columns should be the predictor variables.}
+\item{data}{A data frame containing the training data. The first column should be the response variable (factor), 
+and the remaining columns should be the predictor variables.}
 
-\item{dataext}{A data frame containing the external validation data. The first column should be the response variable (factor), and the remaining columns should be the predictor variables.}
+\item{dataext}{A data frame containing the external validation data. The first column should be the response 
+variable (factor), and the remaining columns should be the predictor variables.}
 
 \item{kernel}{A character string specifying the kernel type to be used in the SVM. Default is "linear".}
 
@@ -24,7 +26,8 @@ tuneandtrainExtSVM(
 \item{scale}{A logical indicating whether to scale the predictor variables. Default is FALSE.}
 }
 \value{
-A list containing the best cost value (`best_cost`), the final trained model (`best_model`), the AUC on the training data (`AUC_Train`), and the AUC on the external validation data (`AUC_Extern`).
+A list containing the best cost value (`best_cost`), the final trained model (`best_model`), 
+  the AUC on the training data (`final_auc`).
 }
 \description{
 This function tunes and trains an SVM classifier using an external validation dataset. The function 
@@ -37,10 +40,10 @@ data(sample_data_train)
 data(sample_data_extern)
 
 # Example usage
-result <- tuneandtrainExtSVM(sample_data_train, sample_data_extern, kernel = "linear", cost_seq = 2^(-15:15), scale = FALSE)
+result <- tuneandtrainExtSVM(sample_data_train, sample_data_extern, kernel = "linear", 
+  cost_seq = 2^(-15:15), scale = FALSE)
 result$best_cost
 result$best_model
-result$AUC_Train
-result$AUC_Extern
+result$final_auc
 }
 }

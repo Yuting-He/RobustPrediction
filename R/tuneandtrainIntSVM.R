@@ -3,14 +3,16 @@
 #' This function tunes and trains an SVM classifier using internal cross-validation. The function evaluates 
 #' different cost values and selects the best model based on AUC (Area Under the Curve).
 #'
-#' @param data A data frame containing the training data. The first column should be the response variable (factor), and the remaining columns should be the predictor variables.
+#' @param data A data frame containing the training data. The first column should be the response variable (factor), 
+#'   and the remaining columns should be the predictor variables.
 #' @param kernel A character string specifying the kernel type to be used in the SVM. Default is "linear".
 #' @param cost_seq A numeric vector of cost values to be evaluated. Default is `2^(-15:15)`.
 #' @param scale A logical indicating whether to scale the predictor variables. Default is FALSE.
 #' @param nfolds An integer specifying the number of folds for cross-validation. Default is 5.
 #' @param seed An integer specifying the random seed for reproducibility. Default is 123.
 #'
-#' @return A list containing the best cost value (`best_cost`), the final trained model (`best_model`), and the AUC on the training data (`final_auc`).
+#' @return A list containing the best cost value (`best_cost`), the final trained model (`best_model`), 
+#'   and the AUC on the training data (`final_auc`).
 #' @import e1071
 #' @import mlr
 #' @import pROC
@@ -35,10 +37,6 @@
 #' result$final_auc
 #' }
 tuneandtrainIntSVM <- function(data, kernel = "linear", cost_seq = 2^(-15:15), scale = FALSE, nfolds = 5, seed = 123) {
-  # Load necessary libraries
-  library(e1071)
-  library(mlr)
-  library(pROC)
   
   # Ensure data is in data frame format
   data <- as.data.frame(data)
@@ -68,16 +66,18 @@ tuneandtrainIntSVM <- function(data, kernel = "linear", cost_seq = 2^(-15:15), s
         cost <- cost_seq[i]
         
         # Fit SVM model
-        task <- makeClassifTask(data = rbind(XTrain, XTest), target = names(Combined_data)[1], check.data = FALSE)
-        lrn <- makeLearner("classif.svm", predict.type = "prob", kernel = kernel, par.vals = list(cost = cost), scale = scale)
+        task <- mlr::makeClassifTask(data = rbind(XTrain, XTest), target = names(Combined_data)[1], 
+                                     check.data = FALSE)
+        lrn <- mlr::makeLearner("classif.svm", predict.type = "prob", kernel = kernel, 
+                                par.vals = list(cost = cost), scale = scale)
         
         train.set <- 1:nrow(XTrain)
         test.set <- (nrow(XTrain) + 1):nrow(rbind(XTrain, XTest))
         
-        model <- train(lrn, task, subset = train.set)
-        pred <- predict(model, task = task, subset = test.set)
+        model <- mlr::train(lrn, task, subset = train.set)
+        pred <- stats::predict(model, task = task, subset = test.set)
         
-        auc_CV[i, j] <- performance(pred, measures = list(mlr::auc))
+        auc_CV[i, j] <- mlr::performance(pred, measures = list(mlr::auc))
       }
     }
   }
@@ -87,16 +87,18 @@ tuneandtrainIntSVM <- function(data, kernel = "linear", cost_seq = 2^(-15:15), s
   best_cost <- cost_seq[which.max(mean_AUC)]
   
   # Train the final model with the best cost
-  final_task <- makeClassifTask(data = Combined_data, target = names(Combined_data)[1], check.data = FALSE)
-  final_lrn <- makeLearner("classif.svm", predict.type = "prob", kernel = kernel, par.vals = list(cost = best_cost), scale = scale)
+  final_task <- mlr::makeClassifTask(data = Combined_data, target = names(Combined_data)[1], 
+                                     check.data = FALSE)
+  final_lrn <- mlr::makeLearner("classif.svm", predict.type = "prob", kernel = kernel, 
+                                par.vals = list(cost = best_cost), scale = scale)
   
-  final_model <- train(final_lrn, final_task, subset = 1:nrow(data))
+  final_model <- mlr::train(final_lrn, final_task, subset = 1:nrow(data))
   
   # Predict on the training data using the optimal cost value
-  pred_SVM_Train <- predict(final_model, task = final_task, subset = 1:nrow(data))
+  pred_SVM_Train <- stats::predict(final_model, task = final_task, subset = 1:nrow(data))
   
   # Calculate AUC on the training data
-  AUC_Train <- performance(pred_SVM_Train, measures = list(mlr::auc))
+  AUC_Train <- mlr::performance(pred_SVM_Train, measures = list(mlr::auc))
   
   # Return the result
   res <- list(

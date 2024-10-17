@@ -14,7 +14,8 @@ tuneandtrainIntSVM(
 )
 }
 \arguments{
-\item{data}{A data frame containing the training data. The first column should be the response variable (factor), and the remaining columns should be the predictor variables.}
+\item{data}{A data frame containing the training data. The first column should be the response variable (factor), 
+and the remaining columns should be the predictor variables.}
 
 \item{kernel}{A character string specifying the kernel type to be used in the SVM. Default is "linear".}
 
@@ -27,7 +28,8 @@ tuneandtrainIntSVM(
 \item{seed}{An integer specifying the random seed for reproducibility. Default is 123.}
 }
 \value{
-A list containing the best cost value (`best_cost`), the final trained model (`best_model`), and the AUC on the training data (`final_auc`).
+A list containing the best cost value (`best_cost`), the final trained model (`best_model`), 
+  and the AUC on the training data (`final_auc`).
 }
 \description{
 This function tunes and trains an SVM classifier using internal cross-validation. The function evaluates 

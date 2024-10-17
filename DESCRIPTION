@@ -1,11 +1,16 @@
 Package: RobustPrediction
 Type: Package
-Title: Robust Parameter Tuning and Training for Prediction Across Data
-        Sources
+Title: Robust Tuning and Training for Cross-Source Prediction
 Version: 0.1.0
-Author: Nicole Ellenbach, Anne-Laure Boulesteix, Bernd Bischl, Kristian Unger, Roman Hornung 
+Authors@R: c(
+    person("Yuting", "He", email = "Yuting.He@campus.lmu.de", role = c("aut", "cre")),
+    person("Nicole", "Ellenbach", role = "ctb"),
+    person("Anne-Laure", "Boulesteix", role = "ctb"),
+    person("Bernd", "Bischl", role = "ctb"),
+    person("Kristian", "Unger", role = "ctb"),
+    person("Roman", "Hornung", role = "ctb"))
 Maintainer: Yuting He <Yuting.He@campus.lmu.de>
-Description: This package provides robust tuning and training for predictive models across data sources. The tuning methods are based on the paper by N. Ellenbach et al., Improved Outcome Prediction Across Data Sources Through Robust Parameter Tuning.
+Description: Provides robust parameter tuning and model training for predictive models across data sources. This package implements three primary tuning methods: cross-validation-based internal tuning, external tuning, and the RobustTuneC method. It supports Lasso, Ridge, Random Forest, Boosting, and SVM classifiers. The tuning methods are based on the paper by Nicole Ellenbach, Anne-Laure Boulesteix, Bernd Bischl, Kristian Unger, and Roman Hornung (2021), titled "Improved Outcome Prediction Across Data Sources Through Robust Parameter Tuning."
 License: GPL-3
 Encoding: UTF-8
 RoxygenNote: 7.3.2

@@ -7,7 +7,8 @@
 tuneandtrainIntLasso(data, maxit = 120000, nlambda = 200, nfolds = 5)
 }
 \arguments{
-\item{data}{A data frame containing the training data. The first column should be the response variable (factor), and the remaining columns should be the predictor variables.}
+\item{data}{A data frame containing the training data. The first column should be the response variable (factor), 
+and the remaining columns should be the predictor variables.}
 
 \item{maxit}{An integer specifying the maximum number of iterations. Default is 120000.}
 
@@ -16,7 +17,8 @@ tuneandtrainIntLasso(data, maxit = 120000, nlambda = 200, nfolds = 5)
 \item{nfolds}{An integer specifying the number of folds for cross-validation. Default is 5.}
 }
 \value{
-A list containing the best lambda value (`best_lambda`), the final trained model (`best_model`), the AUC on the training data (`final_auc`), and the number of active coefficients (`active_set_Train`).
+A list containing the best lambda value (`best_lambda`), the final trained model (`best_model`), 
+  the AUC on the training data (`final_auc`), and the number of active coefficients (`active_set_Train`).
 }
 \description{
 This function tunes and trains a Lasso classifier using internal cross-validation. The function evaluates 

@@ -6,11 +6,14 @@
 #' @param data Training data as a data frame. The first column should be the response variable.
 #' @param dataext External validation data as a data frame. The first column should be the response variable.
 #' @param K Number of folds to use in cross-validation. Default is 5.
-#' @param mstop_seq A sequence of boosting iterations to consider. Default is a sequence starting at 5 and increasing by 5 each time, up to 1000.
+#' @param mstop_seq A sequence of boosting iterations to consider. Default is a sequence starting at 5 and 
+#'   increasing by 5 each time, up to 1000.
 #' @param nu Learning rate for the boosting algorithm. Default is 0.1.
-#' @return A list containing the best number of boosting iterations (`best_mstop`), the final trained model (`best_model`), and the AUC of the final model (`final_auc`).
+#' @return A list containing the best number of boosting iterations (`best_mstop`), 
+#'   the final trained model (`best_model`), and the AUC of the final model (`final_auc`).
 #' @import mboost
 #' @import pROC
+#' @importFrom stats predict
 #' @export
 #' 
 #' @examples
@@ -27,10 +30,6 @@
 #' result$final_auc
 #' }
 tuneandtrainRobustTuneCBoost <- function(data, dataext, K = 5, mstop_seq = seq(5, 1000, by = 5), nu = 0.1) {
-  
-  # Load necessary libraries
-  library(mboost)
-  library(pROC)
   
   # Ensure data and dataext are matrices
   x_train <- as.matrix(data[, -1])  # Exclude the response variable (first column)
@@ -57,13 +56,14 @@ tuneandtrainRobustTuneCBoost <- function(data, dataext, K = 5, mstop_seq = seq(5
       AUC_CV[, j] <- NA
     } else {
       # Train the model
-      fit_Boost_CV <- glmboost(x = XTrain, y = yTrain,
-                               family = Binomial(), control = boost_control(mstop = max(mstop_seq), nu = nu),
-                               center = FALSE)
+      fit_Boost_CV <- mboost::glmboost(x = XTrain, y = yTrain,
+                                       family = mboost::Binomial(), 
+                                       control = mboost::boost_control(mstop = max(mstop_seq), nu = nu),
+                                       center = FALSE)
       
       for (i in seq_along(mstop_seq)) {
         # External validation
-        pred_Boost_CV <- predict(fit_Boost_CV[mstop_seq[i]], newdata = XTest, type = "response")
+        pred_Boost_CV <- stats::predict(fit_Boost_CV[mstop_seq[i]], newdata = XTest, type = "response")
         
         # 1-AUC
         AUC_CV[i, j] <- 1 - pROC::auc(response = yTest, predictor = pred_Boost_CV[, 1])
@@ -91,7 +91,7 @@ tuneandtrainRobustTuneCBoost <- function(data, dataext, K = 5, mstop_seq = seq(5
       done <- TRUE
     }
     
-    pred_Boost_Test.c <- predict(fit_Boost_CV[mstop.c], newdata = x_test, type = "response")
+    pred_Boost_Test.c <- stats::predict(fit_Boost_CV[mstop.c], newdata = x_test, type = "response")
     AUC_Test.c[i] <- pROC::auc(response = y_test, predictor = pred_Boost_Test.c[, 1])[1]
     
     i <- i + 1
@@ -110,12 +110,13 @@ tuneandtrainRobustTuneCBoost <- function(data, dataext, K = 5, mstop_seq = seq(5
   }
   
   # Train the final model with the chosen mstop
-  final_model <- glmboost(x = x_train, y = y_train,
-                          family = Binomial(), control = boost_control(mstop = mstop.c, nu = nu),
-                          center = FALSE)
+  final_model <- mboost::glmboost(x = x_train, y = y_train,
+                                  family = mboost::Binomial(), 
+                                  control = mboost::boost_control(mstop = mstop.c, nu = nu),
+                                  center = FALSE)
   
   # Calculate AUC on the external validation set
-  final_predictions <- predict(final_model, newdata = x_test, type = "response")
+  final_predictions <- stats::predict(final_model, newdata = x_test, type = "response")
   final_auc <- pROC::auc(response = y_test, predictor = final_predictions[, 1])
   
   # Return the result

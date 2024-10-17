@@ -15,7 +15,8 @@ tuneandtrainRobustTuneCSVM(
 )
 }
 \arguments{
-\item{data}{A data frame containing the training data. The first column should be the response variable (factor), and the remaining columns should be the predictor variables.}
+\item{data}{A data frame containing the training data. The first column should be the response variable (factor), 
+and the remaining columns should be the predictor variables.}
 
 \item{dataext}{A data frame containing the external validation data. The first column should be the response variable (factor), and the remaining columns should be the predictor variables.}
 
@@ -23,14 +24,16 @@ tuneandtrainRobustTuneCSVM(
 
 \item{seed}{An integer specifying the random seed for reproducibility. Default is 123.}
 
-\item{kernel}{A character string specifying the kernel type to be used in the SVM. It can be "linear", "polynomial", "radial", or "sigmoid". Default is "linear".}
+\item{kernel}{A character string specifying the kernel type to be used in the SVM. 
+It can be "linear", "polynomial", "radial", or "sigmoid". Default is "linear".}
 
 \item{cost_seq}{A numeric vector of cost values to be evaluated. Default is `2^(-15:15)`.}
 
 \item{scale}{A logical value indicating whether to scale the predictor variables. Default is `FALSE`.}
 }
 \value{
-A list containing the best cost value (`best_cost`), the final trained model (`best_model`), and the AUC of the final model (`final_auc`).
+A list containing the best cost value (`best_cost`), the final trained model (`best_model`), 
+  and the AUC of the final model (`final_auc`).
 }
 \description{
 This function tunes and trains an SVM classifier using the "RobustTuneC" method. The function 

@@ -7,16 +7,19 @@
 tuneandtrainExtLasso(data, dataext, maxit = 120000, nlambda = 100)
 }
 \arguments{
-\item{data}{A data frame containing the training data. The first column should be the response variable (factor), and the remaining columns should be the predictor variables.}
+\item{data}{A data frame containing the training data. The first column should be the response variable (factor), 
+and the remaining columns should be the predictor variables.}
 
-\item{dataext}{A data frame containing the external validation data. The first column should be the response variable (factor), and the remaining columns should be the predictor variables.}
+\item{dataext}{A data frame containing the external validation data. The first column should be the response variable 
+(factor), and the remaining columns should be the predictor variables.}
 
 \item{maxit}{An integer specifying the maximum number of iterations. Default is 120000.}
 
 \item{nlambda}{An integer specifying the number of lambda values to use in the Lasso model. Default is 100.}
 }
 \value{
-A list containing the best lambda value (`best_lambda`), the final trained model (`best_model`), the AUC on the training data (`AUC_Train`), and the number of active coefficients (`active_set_Train`).
+A list containing the best lambda value (`best_lambda`), the final trained model (`best_model`), 
+  the AUC value of the final model (`final_auc`).
 }
 \description{
 This function tunes and trains a Lasso classifier using an external validation dataset. The function 
@@ -32,7 +35,7 @@ data(sample_data_extern)
 result <- tuneandtrainExtLasso(sample_data_train, sample_data_extern, maxit = 120000, nlambda = 100)
 result$best_lambda
 result$best_model
-result$AUC_Train
+result$final_auc
 result$active_set_Train
 }
 }

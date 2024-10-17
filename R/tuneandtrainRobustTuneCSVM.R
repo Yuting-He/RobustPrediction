@@ -3,20 +3,24 @@
 #' This function tunes and trains an SVM classifier using the "RobustTuneC" method. The function 
 #' uses K-fold cross-validation (with K specified by the user) to select the best model based on AUC (Area Under the Curve).
 #'
-#' @param data A data frame containing the training data. The first column should be the response variable (factor), and the remaining columns should be the predictor variables.
+#' @param data A data frame containing the training data. The first column should be the response variable (factor), 
+#'   and the remaining columns should be the predictor variables.
 #' @param dataext A data frame containing the external validation data. The first column should be the response variable (factor), and the remaining columns should be the predictor variables.
 #' @param seed An integer specifying the random seed for reproducibility. Default is 123.
-#' @param kernel A character string specifying the kernel type to be used in the SVM. It can be "linear", "polynomial", "radial", or "sigmoid". Default is "linear".
+#' @param kernel A character string specifying the kernel type to be used in the SVM. 
+#'   It can be "linear", "polynomial", "radial", or "sigmoid". Default is "linear".
 #' @param cost_seq A numeric vector of cost values to be evaluated. Default is `2^(-15:15)`.
 #' @param scale A logical value indicating whether to scale the predictor variables. Default is `FALSE`.
 #' @param K Number of folds to use in cross-validation. Default is 5.
 #'
-#' @return A list containing the best cost value (`best_cost`), the final trained model (`best_model`), and the AUC of the final model (`final_auc`).
+#' @return A list containing the best cost value (`best_cost`), the final trained model (`best_model`), 
+#'   and the AUC of the final model (`final_auc`).
 #' @export
 #'
 #' @import mlr
 #' @import e1071
 #' @import pROC
+#' @import stats
 #'
 #' @examples
 #' \dontrun{
@@ -32,11 +36,6 @@
 #' result$final_auc
 #' }
 tuneandtrainRobustTuneCSVM <- function(data, dataext, K = 5, seed = 123, kernel = "linear", cost_seq = 2^(-15:15), scale = FALSE) {
-  
-  # library
-  library(mlr)
-  library(e1071)
-  library(pROC)
   
   # Split Train in K parts
   n <- nrow(data)
@@ -63,16 +62,16 @@ tuneandtrainRobustTuneCSVM <- function(data, dataext, K = 5, seed = 123, kernel 
         # Fit SVM
         set.seed(seed)
         
-        task <- makeClassifTask(data = Combined_data, target = "y", check.data = FALSE)
-        lrn <- makeLearner("classif.svm", predict.type = "prob", kernel = kernel, cost = c, scale = scale)
+        task <- mlr::makeClassifTask(data = Combined_data, target = "y", check.data = FALSE)
+        lrn <- mlr::makeLearner("classif.svm", predict.type = "prob", kernel = kernel, cost = c, scale = scale)
         
         train.set <- 1:nrow(XTrain)
         test.set <- (nrow(XTrain) + 1):nrow(Combined_data)
         
-        model <- train(lrn, task, subset = train.set)
-        pred <- predict(model, task = task, subset = test.set)
+        model <- mlr::train(lrn, task, subset = train.set)
+        pred <- stats::predict(model, task = task, subset = test.set)
         
-        auc_CV[i, j] <- 1 - performance(pred, measures = list(mlr::auc))
+        auc_CV[i, j] <- 1 - mlr::performance(pred, measures = list(mlr::auc))
         
         i <- i + 1
       }
@@ -108,13 +107,13 @@ tuneandtrainRobustTuneCSVM <- function(data, dataext, K = 5, seed = 123, kernel 
     train.set <- 1:nrow(data)
     extern.set <- (nrow(data) + 1):nrow(CombinedTrainExtern)
     
-    task_Test <- makeClassifTask(data = CombinedTrainExtern, target = "y", check.data = FALSE)
-    lrn_Test.c <- makeLearner("classif.svm", predict.type = "prob", kernel = kernel, cost = cost.c, scale = scale)
+    task_Test <- mlr::makeClassifTask(data = CombinedTrainExtern, target = "y", check.data = FALSE)
+    lrn_Test.c <- mlr::makeLearner("classif.svm", predict.type = "prob", kernel = kernel, cost = cost.c, scale = scale)
     
-    model_Test.c <- train(lrn_Test.c, task_Test, subset = train.set)
-    pred_Test.c <- predict(model_Test.c, task = task_Test, subset = extern.set)
+    model_Test.c <- mlr::train(lrn_Test.c, task_Test, subset = train.set)
+    pred_Test.c <- stats::predict(model_Test.c, task = task_Test, subset = extern.set)
     
-    AUC_Test.c[i] <- performance(pred_Test.c, measures = list(mlr::auc))
+    AUC_Test.c[i] <- mlr::performance(pred_Test.c, measures = list(mlr::auc))
     
     i <- i + 1
   }
@@ -134,14 +133,14 @@ tuneandtrainRobustTuneCSVM <- function(data, dataext, K = 5, seed = 123, kernel 
   data <- as.data.frame(data)  # Ensure data is a data frame
   data$y <- as.factor(data$y)  # Ensure the target variable is a factor
   
-  final_task <- makeClassifTask(data = data, target = "y", check.data = FALSE)
-  final_learner <- makeLearner("classif.svm", predict.type = "prob", kernel = kernel, cost = cost.c, scale = scale)
-  final_model <- train(final_learner, final_task)
+  final_task <- mlr::makeClassifTask(data = data, target = "y", check.data = FALSE)
+  final_learner <- mlr::makeLearner("classif.svm", predict.type = "prob", kernel = kernel, cost = cost.c, scale = scale)
+  final_model <- mlr::train(final_learner, final_task)
   
   # Calculate AUC on the external validation set
   dataext <- as.data.frame(dataext)
-  pred_final <- predict(final_model, newdata = dataext)
-  final_auc <- performance(pred_final, measures = list(mlr::auc))
+  pred_final <- stats::predict(final_model, newdata = dataext)
+  final_auc <- mlr::performance(pred_final, measures = list(mlr::auc))
   
   # return result
   res <- list(

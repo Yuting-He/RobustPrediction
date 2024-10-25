@@ -16,6 +16,7 @@ Encoding: UTF-8
 RoxygenNote: 7.3.2
 NeedsCompilation: no
 LazyData: true
+Depends: R (>= 3.5.0)
 Imports:
     e1071,
     glmnet,

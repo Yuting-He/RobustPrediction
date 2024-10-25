@@ -1,8 +1,13 @@
 #' Tune and Train Internal Ridge 
 #'
-#' This function tunes and trains a Ridge classifier using internal cross-validation. The function evaluates 
-#' different lambda values and selects the best model based on AUC (Area Under the Curve).
+#' This function tunes and trains a Ridge classifier using the \code{glmnet} package. The function 
+#' evaluates a sequence of lambda (regularization) values using internal cross-validation and selects 
+#' the best model based on the Area Under the Curve (AUC).
 #'
+#' The function trains a logistic Ridge regression model on the training dataset and performs cross-validation 
+#' to select the best lambda value. The lambda value that gives the highest AUC on the training dataset during 
+#' cross-validation is chosen as the best model.
+#' 
 #' @param data A data frame containing the training data. The first column should be the response variable (factor), 
 #'   and the remaining columns should be the predictor variables.
 #' @param maxit An integer specifying the maximum number of iterations. Default is 120000.
@@ -14,6 +19,7 @@
 #'   and the AUC on the training data (`final_auc`).
 #' @import glmnet
 #' @import pROC
+#' @importFrom stats predict
 #' @export
 #'
 #' @examples
@@ -60,7 +66,7 @@ tuneandtrainIntRidge <- function(data, maxit = 120000, nlambda = 200, nfolds = 5
     } else {
       fit_Ridge_CV <- glmnet::glmnet(x = XTrain, y = yTrain, family = "binomial", 
                                      maxit = maxit, lambda = lamseq, alpha = 0, standardize = TRUE)
-      pred_Ridge_CV <- glmnet::predict(fit_Ridge_CV, newx = XTest, s = lamseq, type = "response")
+      pred_Ridge_CV <- stats::predict(fit_Ridge_CV, newx = XTest, s = lamseq, type = "response")
       
       for (i in 1:ncol(pred_Ridge_CV)) {
         AUC_CV[i, j] <- pROC::auc(response = yTest, predictor = as.numeric(pred_Ridge_CV[, i]))
@@ -78,7 +84,7 @@ tuneandtrainIntRidge <- function(data, maxit = 120000, nlambda = 200, nfolds = 5
                                 lambda = best_lambda, alpha = 0, standardize = TRUE)
   
   # Predict on the training data using the optimal lambda value
-  pred_Ridge_Train <- glmnet::predict(final_model, newx = X, s = best_lambda, type = "response")
+  pred_Ridge_Train <- stats::predict(final_model, newx = X, s = best_lambda, type = "response")
   
   # Calculate AUC on the training data
   AUC_Train <- pROC::auc(response = y, predictor = as.numeric(pred_Ridge_Train))

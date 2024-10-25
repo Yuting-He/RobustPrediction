@@ -1,7 +1,13 @@
 #' Tune and Train RobustTuneC Random Forest
 #'
-#' This function tunes and trains a Random Forest classifier using the "RobustTuneC" method. The function 
-#' uses K-fold cross-validation (with K specified by the user) to select the best model based on AUC (Area Under the Curve).
+#' This function tunes and trains a Random Forest classifier using the \code{ranger} package and the "RobustTuneC" method. 
+#' The function uses K-fold cross-validation to evaluate different \code{min.node.size} values on the training dataset 
+#' and selects the best model based on the Area Under the Curve (AUC).
+#'
+#' Random Forest constructs multiple decision trees and aggregates their predictions. 
+#' The \code{min.node.size} parameter controls the minimum number of samples in each terminal node, affecting model complexity. 
+#' This function evaluates the \code{min.node.size} values through cross-validation and then applies the best model to an 
+#' external validation dataset. The \code{min.node.size} value that results in the highest AUC on the validation dataset is selected.
 #'
 #' @param data A data frame containing the training data. The first column should be the response variable (factor), 
 #'   and the remaining columns should be the predictor variables.

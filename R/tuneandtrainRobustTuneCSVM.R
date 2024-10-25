@@ -1,7 +1,15 @@
 #' Tune and Train RobustTuneC Support Vector Machine (SVM)
 #'
-#' This function tunes and trains an SVM classifier using the "RobustTuneC" method. The function 
-#' uses K-fold cross-validation (with K specified by the user) to select the best model based on AUC (Area Under the Curve).
+#' This function tunes and trains a Support Vector Machine (SVM) classifier using the "RobustTuneC" method. 
+#' It performs K-fold cross-validation (with K specified by the user) to select the best model based on 
+#' the Area Under the Curve (AUC) metric.
+#'
+#' In Support Vector Machines, the \code{cost} parameter controls the trade-off between achieving 
+#' a low training error and a low testing error. 
+#' This function trains an SVM model on the training dataset, performs cross-validation to evaluate different 
+#' \code{cost} values, and selects the one that yields the highest AUC. 
+#' The final model is trained using the optimal cost value, and its performance is reported using the AUC metric 
+#' on the external validation dataset.
 #'
 #' @param data A data frame containing the training data. The first column should be the response variable (factor), 
 #'   and the remaining columns should be the predictor variables.
@@ -20,7 +28,7 @@
 #' @import mlr
 #' @import e1071
 #' @import pROC
-#' @import stats
+#' @importFrom stats predict
 #'
 #' @examples
 #' \dontrun{

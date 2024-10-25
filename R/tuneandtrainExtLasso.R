@@ -1,7 +1,12 @@
 #' Tune and Train External Lasso
 #'
-#' This function tunes and trains a Lasso classifier using an external validation dataset. The function 
-#' selects the best model based on AUC (Area Under the Curve) and provides additional metrics.
+#' This function tunes and trains a Lasso classifier using the \code{glmnet} package. The function 
+#' evaluates a sequence of lambda (regularization) values on an external validation dataset and selects 
+#' the best model based on the Area Under the Curve (AUC).
+#' 
+#' This function trains a logistic Lasso model using the training dataset and validates it on the 
+#' external validation dataset. 
+#' The lambda value that gives the highest AUC on the external validation dataset is selected as the best model.
 #'
 #' @param data A data frame containing the training data. The first column should be the response variable (factor), 
 #'   and the remaining columns should be the predictor variables.
@@ -11,10 +16,11 @@
 #' @param nlambda An integer specifying the number of lambda values to use in the Lasso model. Default is 100.
 #'
 #' @return A list containing the best lambda value (`best_lambda`), the final trained model (`best_model`), 
-#'   the AUC value of the final model (`final_auc`).
+#'   the AUC value of the final model (`final_auc`), The number of active coefficients (`active_set_Train`).
 #' @import glmnet
 #' @import pROC
-#' @import stats
+#' @importFrom stats predict
+#' @importFrom stats coef
 #' @export
 #'
 #' @examples
@@ -56,7 +62,7 @@ tuneandtrainExtLasso <- function(data, dataext, maxit = 120000, nlambda = 100) {
   
   chosen_model <- which.max(AUC)
   chosen_lambda <- fit_Lasso$lambda[chosen_model]
-  coef_active_a <- stats::coef(fit_Lasso, s = chosen_lambda)
+  coef_active_a <- coef(fit_Lasso, s = chosen_lambda)
   active_set_a <- length(coef_active_a@x)
   
   # Determine AUC of the chosen model on the Training dataset

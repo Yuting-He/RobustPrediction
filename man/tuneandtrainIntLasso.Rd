@@ -21,8 +21,14 @@ A list containing the best lambda value (`best_lambda`), the final trained model
   the AUC on the training data (`final_auc`), and the number of active coefficients (`active_set_Train`).
 }
 \description{
-This function tunes and trains a Lasso classifier using internal cross-validation. The function evaluates 
-different lambda values and selects the best model based on AUC (Area Under the Curve).
+This function tunes and trains a Lasso classifier using the \code{glmnet} package. The function 
+performs internal cross-validation to evaluate a sequence of lambda (regularization) values and 
+selects the best model based on the Area Under the Curve (AUC).
+}
+\details{
+This function trains a logistic Lasso model on the training dataset using cross-validation. 
+The lambda value that results in the highest AUC during cross-validation is chosen as the best model, 
+and the final model is trained on the full training dataset with this optimal lambda value.
 }
 \examples{
 \dontrun{

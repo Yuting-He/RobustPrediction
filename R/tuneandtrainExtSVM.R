@@ -1,7 +1,13 @@
 #' Tune and Train External SVM
 #'
-#' This function tunes and trains an SVM classifier using an external validation dataset. The function 
-#' selects the best model based on AUC (Area Under the Curve) and provides the final trained model and AUC on the external dataset.
+#' This function tunes and trains a Support Vector Machine (SVM) classifier using the \code{mlr} package. 
+#' The function evaluates a sequence of cost values on an external validation dataset and selects 
+#' the best model based on the Area Under the Curve (AUC).
+#'
+#' In Support Vector Machines, The \code{cost} parameter controls the trade-off between 
+#' achieving a low training error and a low testing error. 
+#' This function trains an SVM model on the training dataset and validates it using the external validation dataset. 
+#' The cost value that results in the highest AUC on the external validation dataset is chosen as the best model.
 #'
 #' @param data A data frame containing the training data. The first column should be the response variable (factor), 
 #'   and the remaining columns should be the predictor variables.
@@ -16,6 +22,7 @@
 #' @import e1071
 #' @import mlr
 #' @import pROC
+#' @importFrom stats predict
 #' @export
 #'
 #' @examples

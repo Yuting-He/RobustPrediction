@@ -55,8 +55,6 @@
 #' }
 tuneandtrainExt <- function(data, dataext, classifier, ...) {
   
-  # arguments
-  #args <- list(...)
   
   # run function by classifer
   if (classifier == "boosting") {

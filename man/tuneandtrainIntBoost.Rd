@@ -20,8 +20,14 @@ A list containing the best number of boosting iterations (`best_mstop`),
   the final Boosting classifier model (`best_model`) and the AUC on the training data (`final_auc`).
 }
 \description{
-This function tunes and trains a Boosting classifier using internal cross-validation. The function evaluates 
-different numbers of boosting iterations and selects the best model based on AUC (Area Under the Curve).
+This function tunes and trains a Boosting classifier using the \code{mboost} package. The function 
+evaluates a sequence of boosting iterations on the training dataset using internal cross-validation 
+and selects the best model based on the Area Under the Curve (AUC).
+}
+\details{
+This function performs K-fold cross-validation on the training dataset, where the number of boosting 
+iterations (\code{mstop}) is tuned to maximize the AUC. The optimal number of boosting iterations is selected, 
+and the final model is trained on the entire training dataset.
 }
 \examples{
 \dontrun{

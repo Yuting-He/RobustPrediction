@@ -1,8 +1,14 @@
 #' Tune and Train External Boosting
 #'
-#' This function tunes and trains a Boosting classifier using an external validation dataset. The function 
-#' evaluates different numbers of boosting iterations and selects the best model based on AUC (Area Under the Curve).
+#' This function tunes and trains a Boosting classifier using the \code{mboost::glmboost} 
+#' function. The function evaluates a sequence of boosting iterations (mstop) on the 
+#' provided external validation dataset and selects the best model based on the AUC (Area Under the Curve) metric.
 #'
+#' The function first fits an initial Boosting model on the training data using the specified
+#' learning rate (\code{nu}) and evaluates different values of \code{mstop} on the external validation set.
+#' The \code{mstop} value with the highest AUC is chosen as the best model, and the final model is trained
+#' using this optimal \code{mstop}.
+#' 
 #' @param data A data frame containing the training data. The first column should be the 
 #'   response variable (factor), and the remaining columns should be the predictor 
 #'   variables.
@@ -15,6 +21,7 @@
 #'
 #' @return A list containing the best number of boosting iterations (`best_mstop`), 
 #'   the final trained model (`best_model`), and the AUC of the final model (`final_auc`).
+#' 
 #' @import mboost
 #' @import pROC
 #' @importFrom stats predict

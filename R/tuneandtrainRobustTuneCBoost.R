@@ -1,8 +1,13 @@
 #' Tune and Train RobustTuneC Boosting
 #'
-#' This function tunes and trains a Boosting classifier using the "RobustTuneC" method. It performs K-fold cross-validation
-#' (with K specified by the user) and selects the best model based on AUC (Area Under the ROC Curve).
+#' This function tunes and trains a Boosting classifier using the \code{mboost::glmboost} function 
+#' and the "RobustTuneC" method. The function performs K-fold cross-validation on the training dataset 
+#' and evaluates a sequence of boosting iterations (\code{mstop}) based on the Area Under the Curve (AUC).
 #'
+#' After cross-validation, the best \code{mstop} value is selected based on the AUC, and the final Boosting 
+#' model is trained using this optimal \code{mstop}. The external validation dataset is then used to calculate 
+#' the final AUC and assess the model performance.
+#' 
 #' @param data Training data as a data frame. The first column should be the response variable.
 #' @param dataext External validation data as a data frame. The first column should be the response variable.
 #' @param K Number of folds to use in cross-validation. Default is 5.
@@ -11,6 +16,7 @@
 #' @param nu Learning rate for the boosting algorithm. Default is 0.1.
 #' @return A list containing the best number of boosting iterations (`best_mstop`), 
 #'   the final trained model (`best_model`), and the AUC of the final model (`final_auc`).
+#'   
 #' @import mboost
 #' @import pROC
 #' @importFrom stats predict

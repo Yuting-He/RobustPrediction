@@ -1,7 +1,12 @@
 #' Tune and Train Internal Lasso
 #'
-#' This function tunes and trains a Lasso classifier using internal cross-validation. The function evaluates 
-#' different lambda values and selects the best model based on AUC (Area Under the Curve).
+#' This function tunes and trains a Lasso classifier using the \code{glmnet} package. The function 
+#' performs internal cross-validation to evaluate a sequence of lambda (regularization) values and 
+#' selects the best model based on the Area Under the Curve (AUC).
+#'
+#' This function trains a logistic Lasso model on the training dataset using cross-validation. 
+#' The lambda value that results in the highest AUC during cross-validation is chosen as the best model, 
+#' and the final model is trained on the full training dataset with this optimal lambda value.
 #'
 #' @param data A data frame containing the training data. The first column should be the response variable (factor), 
 #'   and the remaining columns should be the predictor variables.
@@ -14,6 +19,7 @@
 #' @import glmnet
 #' @import pROC
 #' @importFrom stats predict
+#' @importFrom stats coef
 #' @export
 #'
 #' @examples
@@ -79,7 +85,7 @@ tuneandtrainIntLasso <- function(data, maxit = 120000, nlambda = 200, nfolds = 5
   AUC_Train <- pROC::auc(response = y, predictor = as.numeric(pred_Lasso_Train))
   
   # Count the number of active coefficients
-  active_set_Train <- length(methods::coef(final_model, s = best_lambda)@x)
+  active_set_Train <- length(coef(final_model, s = best_lambda)@x)
   
   # Return results
   res <- list(

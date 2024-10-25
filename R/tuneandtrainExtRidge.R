@@ -1,7 +1,12 @@
 #' Tune and Train External Ridge
 #'
-#' This function tunes and trains a Ridge classifier using an external validation dataset. The function 
-#' selects the best model based on AUC (Area Under the Curve) and provides additional metrics.
+#' This function tunes and trains a Ridge classifier using the \code{glmnet} package. The function 
+#' evaluates a sequence of lambda (regularization) values on an external validation dataset and selects 
+#' the best model based on the Area Under the Curve (AUC).
+#'
+#' This function trains a logistic Ridge regression model on the training dataset and validates it on the external 
+#' validation dataset. The lambda value that gives the highest AUC on the external validation dataset is selected 
+#' as the best model.
 #'
 #' @param data A data frame containing the training data. The first column should be the response variable (factor), 
 #'   and the remaining columns should be the predictor variables.

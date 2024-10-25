@@ -29,8 +29,14 @@ A list containing the best lambda value (`best_lambda`), the final trained model
   and the AUC on the training data (`final_auc`).
 }
 \description{
-This function tunes and trains a Ridge classifier using internal cross-validation. The function evaluates 
-different lambda values and selects the best model based on AUC (Area Under the Curve).
+This function tunes and trains a Ridge classifier using the \code{glmnet} package. The function 
+evaluates a sequence of lambda (regularization) values using internal cross-validation and selects 
+the best model based on the Area Under the Curve (AUC).
+}
+\details{
+The function trains a logistic Ridge regression model on the training dataset and performs cross-validation 
+to select the best lambda value. The lambda value that gives the highest AUC on the training dataset during 
+cross-validation is chosen as the best model.
 }
 \examples{
 \dontrun{

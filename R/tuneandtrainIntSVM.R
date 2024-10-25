@@ -1,7 +1,14 @@
 #' Tune and Train Internal SVM
 #'
-#' This function tunes and trains an SVM classifier using internal cross-validation. The function evaluates 
-#' different cost values and selects the best model based on AUC (Area Under the Curve).
+#' This function tunes and trains a Support Vector Machine (SVM) classifier using the \code{mlr} package. 
+#' The function evaluates a sequence of cost values using internal cross-validation and selects 
+#' the best model based on the Area Under the Curve (AUC).
+#'
+#' In Support Vector Machines, the \code{cost} parameter controls the trade-off between 
+#' achieving a low training error and a low testing error. 
+#' This function trains an SVM model on the training dataset, performs cross-validation, and 
+#' selects the cost value that results in the highest AUC. The final model is then trained using the optimal 
+#' cost value, and the performance is reported based on the AUC.
 #'
 #' @param data A data frame containing the training data. The first column should be the response variable (factor), 
 #'   and the remaining columns should be the predictor variables.
@@ -16,6 +23,7 @@
 #' @import e1071
 #' @import mlr
 #' @import pROC
+#' @importFrom stats predict
 #' @export
 #'
 #' @examples

@@ -1,7 +1,13 @@
 #' Tune and Train RobustTuneC Ridge
 #'
-#' This function tunes and trains a Ridge classifier using the "RobustTuneC" method. The function 
-#' uses K-fold cross-validation (with K specified by the user) to select the best model based on AUC (Area Under the Curve).
+#' This function tunes and trains a Ridge classifier using the \code{glmnet} package with the "RobustTuneC" method.
+#' The function evaluates a sequence of lambda (regularization) values using K-fold cross-validation (K specified by the user) 
+#' on the training dataset and selects the best model based on Area Under the Curve (AUC). 
+#'
+#' The function first performs K-fold cross-validation on the training dataset to select the best lambda value based on AUC. 
+#' Then, the model is further validated on an external dataset, and the lambda value that provides the best performance on 
+#' the external dataset is chosen as the final model. The Ridge regression is fitted using the selected lambda value, and 
+#' the final model's performance is evaluated using AUC on the external validation dataset.
 #'
 #' @param data A data frame containing the training data. The first column should be the response variable (factor), 
 #'   and the remaining columns should be the predictor variables.
@@ -60,7 +66,7 @@ tuneandtrainRobustTuneCRidge <- function(data, dataext, K = 5, maxit = 120000, n
                                      family = "binomial", maxit = maxit, lambda = lamseq, alpha = 0, standardize = TRUE)
       
       # External Validation
-      pred_Ridge_CV <- glmnet::predict(fit_Ridge_CV, newx = as.matrix(XTest[, 2:ncol(XTest)]), s = lamseq, type = "response")
+      pred_Ridge_CV <- stats::predict(fit_Ridge_CV, newx = as.matrix(XTest[, 2:ncol(XTest)]), s = lamseq, type = "response")
       
       # Determine AUC to choose 'best' model using pROC package
       for (i in 1:ncol(pred_Ridge_CV)) {
@@ -92,7 +98,7 @@ tuneandtrainRobustTuneCRidge <- function(data, dataext, K = 5, maxit = 120000, n
       done <- TRUE
     }
     
-    pred_Ridge <- glmnet::predict(fit_Ridge, newx = as.matrix(dataext[, 2:ncol(dataext)]), s = lambda.c, type = "response")
+    pred_Ridge <- stats::predict(fit_Ridge, newx = as.matrix(dataext[, 2:ncol(dataext)]), s = lambda.c, type = "response")
     AUC_Test.c[i] <- pROC::auc(response = as.factor(dataext[, 1]), predictor = pred_Ridge[, 1])
     
     i <- i + 1
@@ -114,7 +120,7 @@ tuneandtrainRobustTuneCRidge <- function(data, dataext, K = 5, maxit = 120000, n
                                 family = "binomial", lambda = lambda.c, alpha = 0, standardize = TRUE)
   
   # Calculate AUC on the external validation set using pROC package
-  final_predictions <- glmnet::predict(final_model, newx = as.matrix(dataext[, 2:ncol(dataext)]), type = "response")
+  final_predictions <- stats::predict(final_model, newx = as.matrix(dataext[, 2:ncol(dataext)]), type = "response")
   final_auc <- pROC::auc(response = as.factor(dataext[, 1]), predictor = final_predictions[, 1])
   
   # Return result:

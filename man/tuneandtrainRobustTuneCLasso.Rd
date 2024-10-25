@@ -30,8 +30,14 @@ A list containing the best lambda value (`best_lambda`), the final trained model
   the AUC on the training data (`final_auc`), and the number of active coefficients (`active_set_Train`).
 }
 \description{
-This function tunes and trains a Lasso classifier using the "RobustTuneC" method. The function 
-uses K-fold cross-validation (with K specified by the user) to select the best model based on AUC (Area Under the Curve).
+This function tunes and trains a Lasso classifier using the \code{glmnet} package and the "RobustTuneC" method.
+The function uses K-fold cross-validation to evaluate a sequence of lambda (regularization) values and selects 
+the best model based on the Area Under the Curve (AUC).
+}
+\details{
+This function trains a logistic Lasso model using the training dataset and validates it through cross-validation.
+After selecting the best lambda value based on the training data, the model is then applied to an external validation dataset
+to compute the final AUC. The lambda value that results in the highest AUC on the external validation dataset is chosen as the best model.
 }
 \examples{
 \dontrun{

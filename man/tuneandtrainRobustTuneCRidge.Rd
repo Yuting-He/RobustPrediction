@@ -30,8 +30,15 @@ A list containing the best lambda value (`best_lambda`), the final trained model
   and the AUC of the final model (`final_auc`).
 }
 \description{
-This function tunes and trains a Ridge classifier using the "RobustTuneC" method. The function 
-uses K-fold cross-validation (with K specified by the user) to select the best model based on AUC (Area Under the Curve).
+This function tunes and trains a Ridge classifier using the \code{glmnet} package with the "RobustTuneC" method.
+The function evaluates a sequence of lambda (regularization) values using K-fold cross-validation (K specified by the user) 
+on the training dataset and selects the best model based on Area Under the Curve (AUC).
+}
+\details{
+The function first performs K-fold cross-validation on the training dataset to select the best lambda value based on AUC. 
+Then, the model is further validated on an external dataset, and the lambda value that provides the best performance on 
+the external dataset is chosen as the final model. The Ridge regression is fitted using the selected lambda value, and 
+the final model's performance is evaluated using AUC on the external validation dataset.
 }
 \examples{
 \dontrun{

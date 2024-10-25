@@ -1,7 +1,13 @@
 #' Tune and Train External Random Forest
 #'
-#' This function tunes and trains a Random Forest classifier using an external validation dataset. The function 
-#' tunes the `min.node.size` parameter based on the performance on the external dataset.
+#' This function tunes and trains a Random Forest classifier using the \code{ranger} package. The function 
+#' evaluates a sequence of \code{min.node.size} values on an external validation dataset and selects 
+#' the best model based on the Area Under the Curve (AUC).
+#'
+#' Random Forest is an ensemble learning method that constructs multiple decision trees and aggregates their predictions. 
+#' The \code{min.node.size} parameter controls the minimum number of samples in each terminal node, affecting model complexity. 
+#' This function trains a Random Forest model on the training dataset and validates it using the external validation dataset. 
+#' The \code{min.node.size} value that results in the highest AUC on the external validation dataset is chosen as the best model.
 #'
 #' @param data A data frame containing the training data. The first column should be the response variable (factor), 
 #'   and the remaining columns should be the predictor variables.
@@ -13,6 +19,8 @@
 #'   the final trained model (`best_model`), and the AUC of the final model (`final_auc`).
 #' @import ranger
 #' @import mlr
+#' @importFrom mlr performance
+#' @importFrom stats predict
 #' @import pROC
 #' @export
 #'

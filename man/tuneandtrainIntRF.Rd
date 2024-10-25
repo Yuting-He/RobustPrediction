@@ -21,8 +21,15 @@ A list containing the best `min.node.size` value (`best_min_node_size`),
   the final trained model (`best_model`), and the AUC on the training data (`final_auc`).
 }
 \description{
-This function tunes and trains a Random Forest classifier using internal cross-validation. The function evaluates 
-different `min.node.size` values and selects the best model based on AUC (Area Under the Curve).
+This function tunes and trains a Random Forest classifier using the \code{ranger} package with internal cross-validation. 
+The function evaluates a sequence of \code{min.node.size} values on the training dataset and selects 
+the best model based on the Area Under the Curve (AUC).
+}
+\details{
+Random Forest constructs multiple decision trees and aggregates their predictions. 
+The \code{min.node.size} parameter controls the minimum number of samples in each terminal node, affecting model complexity. 
+This function performs cross-validation within the training dataset to evaluate the impact of different \code{min.node.size} values. 
+The \code{min.node.size} value that results in the highest AUC is selected as the best model.
 }
 \examples{
 \dontrun{

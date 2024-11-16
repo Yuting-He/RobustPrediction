@@ -49,7 +49,7 @@ The final model is trained using the optimal cost value, and its performance is 
 on the external validation dataset.
 }
 \examples{
-\dontrun{
+\donttest{
 # Load sample data
 data(sample_data_train)
 data(sample_data_extern)

@@ -16,13 +16,11 @@
 #'
 #' @return A list containing the best number of boosting iterations (`best_mstop`), 
 #'   the final Boosting classifier model (`best_model`) and the AUC on the training data (`final_auc`).
-#' @import mboost
-#' @import pROC
-#' @importFrom stats predict
+#' 
 #' @export
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # Load sample data
 #' data(sample_data_train)
 #'

@@ -33,26 +33,24 @@
 #' @export
 #'
 #' @examples
-#' \dontrun{
 #' # Load sample data
 #' data(sample_data_train)
 #' data(sample_data_extern)
 #'
-#' # Example usage with Random Forest
-#' result_rf <- tuneandtrainExt(sample_data_train, sample_data_extern, 
-#'   classifier = "rf", num.trees = 500)
-#' result_rf$best_min.node.size
-#' result_rf$best_model
-#' result_rf$final_auc
+#' # Example usage with Lasso
+#' result_lasso <- tuneandtrainExt(sample_data_train, sample_data_extern, classifier = "lasso",
+#'   maxit = 120000, nlambda = 100)
+#' result_lasso$best_lambda
+#' result_lasso$best_model
+#' result_lasso$final_auc
+#' result_lasso$active_set_Train
 #'
-#' # Example usage with SVM
-#' result_svm <- tuneandtrainExt(sample_data_train, sample_data_extern, 
-#'   classifier = "svm", kernel = "linear", 
-#'   cost_seq = 2^(-15:15))
-#' result_svm$best_cost
-#' result_svm$best_model
-#' result_svm$final_auc
-#' }
+#' # Example usage with Ridge
+#' result_ridge <- tuneandtrainExt(sample_data_train, sample_data_extern, 
+#'   classifier = "ridge", maxit = 120000, nlambda = 100)
+#' result_ridge$best_lambda
+#' result_ridge$best_model
+#' result_ridge$final_auc
 tuneandtrainExt <- function(data, dataext, classifier, ...) {
   
   

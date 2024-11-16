@@ -17,13 +17,9 @@
 #'
 #' @return A list containing the best lambda value (`best_lambda`), the final trained model (`best_model`), 
 #'   and the AUC on the training data (`final_auc`).
-#' @import glmnet
-#' @import pROC
-#' @importFrom stats predict
 #' @export
 #'
 #' @examples
-#' \dontrun{
 #' # Load sample data
 #' data(sample_data_train)
 #'
@@ -33,7 +29,6 @@
 #' result$best_lambda
 #' result$best_model
 #' result$final_auc
-#' }
 tuneandtrainIntRidge <- function(data, maxit = 120000, nlambda = 200, nfolds = 5, seed = 123) {
   
   # Ensure data is in data frame format

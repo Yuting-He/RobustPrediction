@@ -21,11 +21,7 @@
 #'   and the AUC of the final model (`final_auc`).
 #' @export
 #'
-#' @import glmnet
-#' @import pROC
-#'
 #' @examples
-#' \dontrun{
 #' # Load sample data
 #' data(sample_data_train)
 #' data(sample_data_extern)
@@ -36,7 +32,6 @@
 #' result$best_lambda
 #' result$best_model
 #' result$final_auc
-#' }
 tuneandtrainRobustTuneCRidge <- function(data, dataext, K = 5, maxit = 120000, nlambda = 100) {
   
   # Fit Ridge Model on training data using glmnet package

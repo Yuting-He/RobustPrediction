@@ -36,7 +36,6 @@ The \code{mstop} value with the highest AUC is chosen as the best model, and the
 using this optimal \code{mstop}.
 }
 \examples{
-\dontrun{
 # Load sample data
 data(sample_data_train)
 data(sample_data_extern)
@@ -48,5 +47,4 @@ result <- tuneandtrainExtBoost(sample_data_train, sample_data_extern,
 result$best_mstop
 result$best_model
 result$final_auc
-}
 }

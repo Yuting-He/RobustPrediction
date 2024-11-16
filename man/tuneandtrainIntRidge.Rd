@@ -39,7 +39,6 @@ to select the best lambda value. The lambda value that gives the highest AUC on 
 cross-validation is chosen as the best model.
 }
 \examples{
-\dontrun{
 # Load sample data
 data(sample_data_train)
 
@@ -49,5 +48,4 @@ result <- tuneandtrainIntRidge(sample_data_train, maxit = 120000,
 result$best_lambda
 result$best_model
 result$final_auc
-}
 }

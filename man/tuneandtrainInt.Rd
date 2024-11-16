@@ -30,23 +30,21 @@ by the `classifier` argument, and the function delegates to the appropriate tuni
 on this choice.
 }
 \examples{
-\dontrun{
 # Load sample data
 data(sample_data_train)
 
-# Example usage: Tuning and training a Random Forest classifier
-result_rf <- tuneandtrainInt(sample_data_train, classifier = "rf", 
-  num.trees = 500, nfolds = 5, seed = 123)
-result_rf$best_min.node.size
-result_rf$best_model
-result_rf$final_auc
+# Example usage with Lasso
+result_lasso <- tuneandtrainInt(sample_data_train, classifier = "lasso",
+  maxit = 120000, nlambda = 100)
+result_lasso$best_lambda
+result_lasso$best_model
+result_lasso$final_auc
+result_lasso$active_set_Train
 
-# Example usage: Tuning and training a SVM classifier
-result_svm <- tuneandtrainInt(sample_data_train, classifier = "svm", 
-  kernel = "linear", cost_seq = 2^(-5:5), 
-  scale = FALSE, nfolds = 5, seed = 123)
-result_svm$best_cost
-result_svm$best_model
-result_svm$final_auc
-}
+# Example usage with Ridge
+result_ridge <- tuneandtrainInt(sample_data_train, classifier = "ridge", 
+  maxit = 120000, nlambda = 100)
+result_ridge$best_lambda
+result_ridge$best_model
+result_ridge$final_auc
 }

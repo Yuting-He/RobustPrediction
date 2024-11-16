@@ -37,22 +37,22 @@ A list containing the results from the specific classifier's tuning and training
 This function tunes and trains a specified classifier using the "RobustTuneC" method and the provided data.
 }
 \examples{
-\dontrun{
 # Load sample data
 data(sample_data_train)
 data(sample_data_extern)
 
-# Example usage with Random Forest
-result_rf <- tuneandtrainRobustTuneC(sample_data_train, sample_data_extern, classifier = "rf")
-result_rf$best_min_node_size
-result_rf$best_model
-result_rf$final_auc
+# Example usage with Lasso
+result_lasso <- tuneandtrainRobustTuneC(sample_data_train, sample_data_extern, classifier = "lasso",
+  maxit = 120000, nlambda = 100)
+result_lasso$best_lambda
+result_lasso$best_model
+result_lasso$final_auc
+result_lasso$active_set_Train
 
-
-# Example usage with SVM
-result_svm <- tuneandtrainRobustTuneC(sample_data_train, sample_data_extern, classifier = "svm")
-result_svm$best_cost
-result_svm$best_model
-result_svm$final_auc
-}
+# Example usage with Ridge
+result_ridge <- tuneandtrainRobustTuneC(sample_data_train, sample_data_extern, 
+  classifier = "ridge", maxit = 120000, nlambda = 100)
+result_ridge$best_lambda
+result_ridge$best_model
+result_ridge$final_auc
 }

@@ -41,7 +41,6 @@ the external dataset is chosen as the final model. The Ridge regression is fitte
 the final model's performance is evaluated using AUC on the external validation dataset.
 }
 \examples{
-\dontrun{
 # Load sample data
 data(sample_data_train)
 data(sample_data_extern)
@@ -52,5 +51,4 @@ result <- tuneandtrainRobustTuneCRidge(sample_data_train, sample_data_extern,
 result$best_lambda
 result$best_model
 result$final_auc
-}
 }

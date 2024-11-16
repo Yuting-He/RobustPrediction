@@ -22,13 +22,9 @@
 #' @return A list containing the best number of boosting iterations (`best_mstop`), 
 #'   the final trained model (`best_model`), and the AUC of the final model (`final_auc`).
 #' 
-#' @import mboost
-#' @import pROC
-#' @importFrom stats predict
 #' @export
 #'
 #' @examples
-#' \dontrun{
 #' # Load sample data
 #' data(sample_data_train)
 #' data(sample_data_extern)
@@ -40,7 +36,6 @@
 #' result$best_mstop
 #' result$best_model
 #' result$final_auc
-#' }
 
 tuneandtrainExtBoost <- function(data, dataext, mstop_seq = seq(5, 1000, by = 5), nu = 0.1) {
   

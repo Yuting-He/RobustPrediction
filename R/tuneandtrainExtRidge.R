@@ -17,13 +17,10 @@
 #'
 #' @return A list containing the best lambda value (`best_lambda`), the final trained model (`best_model`), 
 #'   the AUC of the final model on the training data (`final_auc`).
-#' @import glmnet
-#' @import pROC
-#' @importFrom stats predict
+#' 
 #' @export
 #'
 #' @examples
-#' \dontrun{
 #' # Load sample data
 #' data(sample_data_train)
 #' data(sample_data_extern)
@@ -33,7 +30,7 @@
 #' result$best_lambda
 #' result$best_model
 #' result$final_auc
-#' }
+
 tuneandtrainExtRidge <- function(data, dataext, maxit = 120000, nlambda = 100) {
   
   # Ensure data is in data frame format

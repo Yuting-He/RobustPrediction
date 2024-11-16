@@ -41,7 +41,7 @@ This function trains an SVM model on the training dataset and validates it using
 The cost value that results in the highest AUC on the external validation dataset is chosen as the best model.
 }
 \examples{
-\dontrun{
+\donttest{
 # Load sample data
 data(sample_data_train)
 data(sample_data_extern)

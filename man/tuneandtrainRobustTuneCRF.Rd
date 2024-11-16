@@ -33,7 +33,7 @@ This function evaluates the \code{min.node.size} values through cross-validation
 external validation dataset. The \code{min.node.size} value that results in the highest AUC on the validation dataset is selected.
 }
 \examples{
-\dontrun{
+\donttest{
 # Load sample data
 data(sample_data_train)
 data(sample_data_extern)

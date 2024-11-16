@@ -18,15 +18,11 @@
 #'
 #' @return A list containing the best minimum node size (`best_min_node_size`), 
 #'   the final trained model (`best_model`), and the AUC of the final model (`final_auc`).
+#' @importFrom ranger ranger
 #' @export
 #'
-#' @import mlr
-#' @import ranger
-#' @import pROC
-#' @importFrom stats predict
-#'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # Load sample data
 #' data(sample_data_train)
 #' data(sample_data_extern)
@@ -38,10 +34,6 @@
 #' result$final_auc
 #' }
 tuneandtrainRobustTuneCRF <- function(data, dataext, K = 5, num.trees = 500) {
-  
-  library(mlr)
-  library(ranger)
-  library(pROC)
   
   # Split Train in K parts
   n <- nrow(data)
@@ -82,7 +74,7 @@ tuneandtrainRobustTuneCRF <- function(data, dataext, K = 5, num.trees = 500) {
         model = mlr::train(lrn, task, subset = train.set)
         pred = stats::predict(model, task = task, subset = test.set)
         
-        auc_CV[i, j] <- 1 - performance(pred, measures = list(mlr::auc))
+        auc_CV[i, j] <- 1 - mlr::performance(pred, measures = list(mlr::auc))
       }
     }
   }

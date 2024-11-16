@@ -32,7 +32,7 @@ This function performs cross-validation within the training dataset to evaluate 
 The \code{min.node.size} value that results in the highest AUC is selected as the best model.
 }
 \examples{
-\dontrun{
+\donttest{
 # Load sample data
 data(sample_data_train)
 

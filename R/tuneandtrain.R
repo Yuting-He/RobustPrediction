@@ -41,25 +41,25 @@
 #' @export
 #'
 #' @examples
-#' \dontrun{
 #' # Load sample data
 #' data(sample_data_train)
 #' data(sample_data_extern)
 #'
-#' # Example usage: Robust tuning with Boosting classifier
+#' # Example usage: Robust tuning with Ridge classifier
 #' result_boosting <- tuneandtrain(sample_data_train, sample_data_extern, 
-#'   tuningmethod = "robusttunec", classifier = "boosting")
-#' result_boosting$best_mstop
+#'   tuningmethod = "robusttunec", classifier = "ridge")
+#' result_boosting$best_lambda
 #' result_boosting$best_model
 #' result_boosting$final_auc
 #'
-#' # Example usage: Internal cross-validation with Random Forest classifier
-#' result_rf <- tuneandtrain(sample_data_train, tuningmethod = "int", 
-#'   classifier = "rf", num.trees = 500, nfolds = 5, seed = 123)
-#' result_rf$best_min.node.size
-#' result_rf$best_model
-#' result_rf$final_auc
-#' }
+#' # Example usage: Internal cross-validation with Lasso classifier
+#' result_lasso <- tuneandtrain(sample_data_train, tuningmethod = "int", 
+#'   classifier = "lasso", maxit = 120000, nlambda = 200, nfolds = 5)
+#' result_lasso$best_lambda
+#' result_lasso$best_model
+#' result_lasso$final_auc
+#' result_lasso$active_set_Train
+
 tuneandtrain <- function(data, dataext = NULL, tuningmethod, classifier, ...) {
   
   # Ensure data is in data frame format

@@ -39,16 +39,14 @@ model is trained using this optimal \code{mstop}. The external validation datase
 the final AUC and assess the model performance.
 }
 \examples{
-\dontrun{
 # Load the sample data
 data(sample_data_train)
 data(sample_data_extern)
 
 # Example usage with the sample data
 mstop_seq <- seq(50, 500, by = 50)
-result <- tuneandtrainRobustTuneCBoost(sample_data_train, sample_data_extern, mstop_seq)
+result <- tuneandtrainRobustTuneCBoost(sample_data_train, sample_data_extern, mstop_seq = mstop_seq)
 result$best_mstop
 result$best_model
 result$final_auc
-}
 }

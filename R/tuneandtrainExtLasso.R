@@ -17,14 +17,10 @@
 #'
 #' @return A list containing the best lambda value (`best_lambda`), the final trained model (`best_model`), 
 #'   the AUC value of the final model (`final_auc`), The number of active coefficients (`active_set_Train`).
-#' @import glmnet
-#' @import pROC
-#' @importFrom stats predict
-#' @importFrom stats coef
+#' 
 #' @export
 #'
 #' @examples
-#' \dontrun{
 #' # Load sample data
 #' data(sample_data_train)
 #' data(sample_data_extern)
@@ -35,7 +31,6 @@
 #' result$best_model
 #' result$final_auc
 #' result$active_set_Train
-#' }
 
 tuneandtrainExtLasso <- function(data, dataext, maxit = 120000, nlambda = 100) {
   
@@ -62,7 +57,7 @@ tuneandtrainExtLasso <- function(data, dataext, maxit = 120000, nlambda = 100) {
   
   chosen_model <- which.max(AUC)
   chosen_lambda <- fit_Lasso$lambda[chosen_model]
-  coef_active_a <- coef(fit_Lasso, s = chosen_lambda)
+  coef_active_a <- stats::coef(fit_Lasso, s = chosen_lambda)
   active_set_a <- length(coef_active_a@x)
   
   # Determine AUC of the chosen model on the Training dataset

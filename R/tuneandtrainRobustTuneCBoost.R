@@ -17,24 +17,19 @@
 #' @return A list containing the best number of boosting iterations (`best_mstop`), 
 #'   the final trained model (`best_model`), and the AUC of the final model (`final_auc`).
 #'   
-#' @import mboost
-#' @import pROC
-#' @importFrom stats predict
 #' @export
 #' 
 #' @examples
-#' \dontrun{
 #' # Load the sample data
 #' data(sample_data_train)
 #' data(sample_data_extern)
 #'
 #' # Example usage with the sample data
 #' mstop_seq <- seq(50, 500, by = 50)
-#' result <- tuneandtrainRobustTuneCBoost(sample_data_train, sample_data_extern, mstop_seq)
+#' result <- tuneandtrainRobustTuneCBoost(sample_data_train, sample_data_extern, mstop_seq = mstop_seq)
 #' result$best_mstop
 #' result$best_model
 #' result$final_auc
-#' }
 tuneandtrainRobustTuneCBoost <- function(data, dataext, K = 5, mstop_seq = seq(5, 1000, by = 5), nu = 0.1) {
   
   # Ensure data and dataext are matrices
@@ -43,7 +38,7 @@ tuneandtrainRobustTuneCBoost <- function(data, dataext, K = 5, mstop_seq = seq(5
   x_test <- as.matrix(dataext[, -1])  # Exclude the response variable in external data
   y_test <- as.factor(dataext[, 1])   # Response variable in external data
   
-  # 5-fold cross validation
+  # K-fold cross validation
   n <- nrow(x_train)
   partition <- rep(1:K, length = n)
   partition <- partition[sample(n)]

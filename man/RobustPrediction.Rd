@@ -9,13 +9,13 @@
 This package provides robust parameter tuning and predictive modeling techniques.
 }
 \details{
-The RobustPrediction package helps users build and tune classifiers using methods such as 
-RobustTuneC, internal, and external tuning approaches. The package supports classifiers 
-such as boosting, lasso, ridge, random forest, and SVM. It is intended for scenarios 
+The 'RobustPrediction' package helps users build and tune classifiers using methods such as 
+'RobustTuneC', internal, and external tuning approaches. The package supports classifiers 
+such as boosting, lasso, ridge, random forest, and support vector machine(SVM). It is intended for scenarios 
 where parameter tuning across data sources is important.
 
 
-The RobustPrediction package provides comprehensive tools for robust parameter tuning 
+The 'RobustPrediction' package provides comprehensive tools for robust parameter tuning 
 and predictive modeling, particularly for cross-source prediction tasks. 
 
 The package includes functions for tuning model parameters using three methods:
@@ -34,7 +34,7 @@ different data sources.
 }
 \section{Dependencies}{
 
-This package requires the following packages: \code{e1071}, \code{glmnet}, \code{mboost}, \code{mlr}, 
+This package requires the following packages: \code{glmnet}, \code{mboost}, \code{mlr}, 
 \code{pROC}, \code{ranger}.
 }
 
@@ -43,14 +43,14 @@ This package requires the following packages: \code{e1071}, \code{glmnet}, \code
 data(sample_data_train)
 data(sample_data_extern)
 res <- tuneandtrain(sample_data_train, sample_data_extern, tuningmethod = "robusttunec", 
-  classifier = "boosting")
+  classifier = "lasso")
 
 }
 \references{
 Ellenbach, N., Boulesteix, A.-L., Bischl, B., Unger, K., & Hornung, R. (2021). 
 Improved outcome prediction across data sources through robust parameter tuning. 
 \emph{Journal of Classification}, \emph{38}, 212-231. 
-Springer. doi:10.1007/s00357-021-09369-y.
+<doi:10.1007/s00357-020-09368-z>.
 }
 \seealso{
 Useful links:
@@ -65,9 +65,6 @@ Useful links:
 Other contributors:
 \itemize{
   \item Nicole Ellenbach [contributor]
-  \item Anne-Laure Boulesteix [contributor]
-  \item Bernd Bischl [contributor]
-  \item Kristian Unger [contributor]
   \item Roman Hornung [contributor]
 }
 

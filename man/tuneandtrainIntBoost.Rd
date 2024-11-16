@@ -30,7 +30,7 @@ iterations (\code{mstop}) is tuned to maximize the AUC. The optimal number of bo
 and the final model is trained on the entire training dataset.
 }
 \examples{
-\dontrun{
+\donttest{
 # Load sample data
 data(sample_data_train)
 

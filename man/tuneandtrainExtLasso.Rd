@@ -32,7 +32,6 @@ external validation dataset.
 The lambda value that gives the highest AUC on the external validation dataset is selected as the best model.
 }
 \examples{
-\dontrun{
 # Load sample data
 data(sample_data_train)
 data(sample_data_extern)
@@ -43,5 +42,4 @@ result$best_lambda
 result$best_model
 result$final_auc
 result$active_set_Train
-}
 }

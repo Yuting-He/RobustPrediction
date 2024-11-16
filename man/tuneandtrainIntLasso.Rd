@@ -31,7 +31,6 @@ The lambda value that results in the highest AUC during cross-validation is chos
 and the final model is trained on the full training dataset with this optimal lambda value.
 }
 \examples{
-\dontrun{
 # Load sample data
 data(sample_data_train)
 
@@ -41,5 +40,4 @@ result$best_lambda
 result$best_model
 result$final_auc
 result$active_set_Train
-}
 }

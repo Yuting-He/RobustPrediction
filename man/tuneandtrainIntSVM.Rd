@@ -44,7 +44,7 @@ selects the cost value that results in the highest AUC. The final model is then 
 cost value, and the performance is reported based on the AUC.
 }
 \examples{
-\dontrun{
+\donttest{
 # Load sample data
 data(sample_data_train)
 

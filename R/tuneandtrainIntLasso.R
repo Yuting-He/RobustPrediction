@@ -16,14 +16,9 @@
 #'
 #' @return A list containing the best lambda value (`best_lambda`), the final trained model (`best_model`), 
 #'   the AUC on the training data (`final_auc`), and the number of active coefficients (`active_set_Train`).
-#' @import glmnet
-#' @import pROC
-#' @importFrom stats predict
-#' @importFrom stats coef
 #' @export
 #'
 #' @examples
-#' \dontrun{
 #' # Load sample data
 #' data(sample_data_train)
 #'
@@ -33,7 +28,6 @@
 #' result$best_model
 #' result$final_auc
 #' result$active_set_Train
-#' }
 
 tuneandtrainIntLasso <- function(data, maxit = 120000, nlambda = 200, nfolds = 5) {
   
@@ -85,7 +79,7 @@ tuneandtrainIntLasso <- function(data, maxit = 120000, nlambda = 200, nfolds = 5
   AUC_Train <- pROC::auc(response = y, predictor = as.numeric(pred_Lasso_Train))
   
   # Count the number of active coefficients
-  active_set_Train <- length(coef(final_model, s = best_lambda)@x)
+  active_set_Train <- length(stats::coef(final_model, s = best_lambda)@x)
   
   # Return results
   res <- list(

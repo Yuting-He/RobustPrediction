@@ -40,7 +40,6 @@ After selecting the best lambda value based on the training data, the model is t
 to compute the final AUC. The lambda value that results in the highest AUC on the external validation dataset is chosen as the best model.
 }
 \examples{
-\dontrun{
 # Load sample data
 data(sample_data_train)
 data(sample_data_extern)
@@ -51,5 +50,4 @@ result <- tuneandtrainRobustTuneCLasso(sample_data_train, sample_data_extern,
 result$best_lambda
 result$best_model
 result$final_auc
-}
 }

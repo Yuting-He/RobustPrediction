@@ -23,15 +23,11 @@
 #'
 #' @return A list containing the best cost value (`best_cost`), the final trained model (`best_model`), 
 #'   and the AUC of the final model (`final_auc`).
+#' @importFrom e1071 svm
 #' @export
 #'
-#' @import mlr
-#' @import e1071
-#' @import pROC
-#' @importFrom stats predict
-#'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # Load sample data
 #' data(sample_data_train)
 #' data(sample_data_extern)

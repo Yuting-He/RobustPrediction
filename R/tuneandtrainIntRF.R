@@ -17,14 +17,11 @@
 #'
 #' @return A list containing the best `min.node.size` value (`best_min_node_size`), 
 #'   the final trained model (`best_model`), and the AUC on the training data (`final_auc`).
-#' @import ranger
-#' @import mlr
-#' @import pROC
-#' @importFrom stats predict
+#' @importFrom ranger ranger
 #' @export
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # Load sample data
 #' data(sample_data_train)
 #'

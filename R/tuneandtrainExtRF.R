@@ -17,15 +17,11 @@
 #'
 #' @return A list containing the best `min.node.size` value(`best_min_node_size`), 
 #'   the final trained model (`best_model`), and the AUC of the final model (`final_auc`).
-#' @import ranger
-#' @import mlr
-#' @importFrom mlr performance
-#' @importFrom stats predict
-#' @import pROC
+#' @importFrom ranger ranger
 #' @export
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # Load sample data
 #' data(sample_data_train)
 #' data(sample_data_extern)
@@ -76,7 +72,7 @@ tuneandtrainExtRF <- function(data, dataext, num.trees = 500) {
   
   final_model <- mlr::train(final_lrn, final_task, subset = 1:nrow(Train))
   
-  # Calculate AUC on the external validation set with the final model using pROC
+  # Calculate AUC on the external validation set with the final model
   pred_final <- stats::predict(final_model, newdata = Extern)
   final_auc <- mlr::performance(pred_final, measures = list(mlr::auc))
   

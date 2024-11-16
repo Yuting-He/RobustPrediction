@@ -32,7 +32,6 @@ validation dataset. The lambda value that gives the highest AUC on the external 
 as the best model.
 }
 \examples{
-\dontrun{
 # Load sample data
 data(sample_data_train)
 data(sample_data_extern)
@@ -42,5 +41,4 @@ result <- tuneandtrainExtRidge(sample_data_train, sample_data_extern, maxit = 12
 result$best_lambda
 result$best_model
 result$final_auc
-}
 }

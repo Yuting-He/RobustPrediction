@@ -15,7 +15,7 @@
 #'   increasing by 5 each time, up to 1000.
 #' @param nu Learning rate for the boosting algorithm. Default is 0.1.
 #' @return A list containing the best number of boosting iterations (`best_mstop`), 
-#'   the final trained model (`best_model`), and the AUC of the final model (`final_auc`).
+#'   the final trained model (`best_model`), the AUC of the final model (`final_auc`), and the chosen c value(`best_c`).
 #'   
 #' @export
 #' 
@@ -30,6 +30,7 @@
 #' result$best_mstop
 #' result$best_model
 #' result$final_auc
+#' result$best_c
 tuneandtrainRobustTuneCBoost <- function(data, dataext, K = 5, mstop_seq = seq(5, 1000, by = 5), nu = 0.1) {
   
   # Ensure data and dataext are matrices
@@ -124,7 +125,8 @@ tuneandtrainRobustTuneCBoost <- function(data, dataext, K = 5, mstop_seq = seq(5
   res <- list(
     best_mstop = mstop.c,
     best_model = final_model,
-    final_auc = final_auc
+    final_auc = final_auc,
+    best_c = c_val
   )
   
   # Set class for the result

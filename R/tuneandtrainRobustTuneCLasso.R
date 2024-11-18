@@ -17,7 +17,8 @@
 #' @param nlambda The number of lambda values to use for cross-validation. Default is 100.
 #'
 #' @return A list containing the best lambda value (`best_lambda`), the final trained model (`best_model`), 
-#'   the AUC on the training data (`final_auc`), and the number of active coefficients (`active_set_Train`).
+#'   the AUC on the training data (`final_auc`), the number of active coefficients (`active_set_Train`),
+#'   and the chosen c value(`best_c`).
 #'
 #' @export
 #'
@@ -32,6 +33,7 @@
 #' result$best_lambda
 #' result$best_model
 #' result$final_auc
+#' result$best_c
 tuneandtrainRobustTuneCLasso <- function(data, dataext, K = 5, maxit = 120000, nlambda = 100) {
   
   # Fit Lasso Model on training data using glmnet package
@@ -127,7 +129,8 @@ tuneandtrainRobustTuneCLasso <- function(data, dataext, K = 5, maxit = 120000, n
     best_lambda = lambda.c,
     best_model = final_model,
     final_auc = final_auc,
-    active_set_Train = active_set_Train
+    active_set_Train = active_set_Train,
+    best_c = c
   )
   
   # set class

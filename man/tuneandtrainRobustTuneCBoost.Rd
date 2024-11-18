@@ -26,7 +26,7 @@ increasing by 5 each time, up to 1000.}
 }
 \value{
 A list containing the best number of boosting iterations (`best_mstop`), 
-  the final trained model (`best_model`), and the AUC of the final model (`final_auc`).
+  the final trained model (`best_model`), the AUC of the final model (`final_auc`), and the chosen c value(`best_c`).
 }
 \description{
 This function tunes and trains a Boosting classifier using the \code{mboost::glmboost} function 
@@ -49,4 +49,5 @@ result <- tuneandtrainRobustTuneCBoost(sample_data_train, sample_data_extern, ms
 result$best_mstop
 result$best_model
 result$final_auc
+result$best_c
 }

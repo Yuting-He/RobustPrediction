@@ -18,7 +18,7 @@
 #' @param nlambda The number of lambda values to use for cross-validation. Default is 100.
 #'
 #' @return A list containing the best lambda value (`best_lambda`), the final trained model (`best_model`), 
-#'   and the AUC of the final model (`final_auc`).
+#'   the AUC of the final model (`final_auc`), and the chosen c value(`best_c`).
 #' @export
 #'
 #' @examples
@@ -32,6 +32,7 @@
 #' result$best_lambda
 #' result$best_model
 #' result$final_auc
+#' result$best_c
 tuneandtrainRobustTuneCRidge <- function(data, dataext, K = 5, maxit = 120000, nlambda = 100) {
   
   # Fit Ridge Model on training data using glmnet package
@@ -122,7 +123,8 @@ tuneandtrainRobustTuneCRidge <- function(data, dataext, K = 5, maxit = 120000, n
   res <- list(
     best_lambda = lambda.c,
     best_model = final_model,
-    final_auc = final_auc
+    final_auc = final_auc,
+    best_c = c
   )
   
   # Set class

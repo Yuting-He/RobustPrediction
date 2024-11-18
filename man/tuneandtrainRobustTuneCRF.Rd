@@ -19,7 +19,7 @@ variable (factor), and the remaining columns should be the predictor variables.}
 }
 \value{
 A list containing the best minimum node size (`best_min_node_size`), 
-  the final trained model (`best_model`), and the AUC of the final model (`final_auc`).
+  the final trained model (`best_model`), the AUC of the final model (`final_auc`), and the chosen c value(`best_c`).
 }
 \description{
 This function tunes and trains a Random Forest classifier using the \code{ranger} package and the "RobustTuneC" method. 
@@ -43,5 +43,6 @@ result <- tuneandtrainRobustTuneCRF(sample_data_train, sample_data_extern, K = 5
 result$best_min_node_size
 result$best_model
 result$final_auc
+result$best_c
 }
 }

@@ -22,7 +22,7 @@
 #' @param K Number of folds to use in cross-validation. Default is 5.
 #'
 #' @return A list containing the best cost value (`best_cost`), the final trained model (`best_model`), 
-#'   and the AUC of the final model (`final_auc`).
+#'   the AUC of the final model (`final_auc`), and the chosen c value(`best_c`).
 #' @importFrom e1071 svm
 #' @export
 #'
@@ -38,6 +38,7 @@
 #' result$best_cost
 #' result$best_model
 #' result$final_auc
+#' result$best_c
 #' }
 tuneandtrainRobustTuneCSVM <- function(data, dataext, K = 5, seed = 123, kernel = "linear", cost_seq = 2^(-15:15), scale = FALSE) {
   
@@ -150,7 +151,8 @@ tuneandtrainRobustTuneCSVM <- function(data, dataext, K = 5, seed = 123, kernel 
   res <- list(
     best_cost = cost.c,
     best_model = final_model,
-    final_auc = final_auc
+    final_auc = final_auc,
+    best_c = c
   )
   
   # Set class

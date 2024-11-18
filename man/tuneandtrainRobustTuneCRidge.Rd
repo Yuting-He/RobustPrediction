@@ -27,7 +27,7 @@ variable (factor), and the remaining columns should be the predictor variables.}
 }
 \value{
 A list containing the best lambda value (`best_lambda`), the final trained model (`best_model`), 
-  and the AUC of the final model (`final_auc`).
+  the AUC of the final model (`final_auc`), and the chosen c value(`best_c`).
 }
 \description{
 This function tunes and trains a Ridge classifier using the \code{glmnet} package with the "RobustTuneC" method.
@@ -51,4 +51,5 @@ result <- tuneandtrainRobustTuneCRidge(sample_data_train, sample_data_extern,
 result$best_lambda
 result$best_model
 result$final_auc
+result$best_c
 }

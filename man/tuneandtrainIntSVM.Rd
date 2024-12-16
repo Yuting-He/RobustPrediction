@@ -28,8 +28,7 @@ and the remaining columns should be the predictor variables.}
 \item{seed}{An integer specifying the random seed for reproducibility. Default is 123.}
 }
 \value{
-A list containing the best cost value (`best_cost`), the final trained model (`best_model`), 
-  and the AUC on the training data (`final_auc`).
+A list containing the best cost value (`best_cost`) and the final trained model (`best_model`).
 }
 \description{
 This function tunes and trains a Support Vector Machine (SVM) classifier using the \code{mlr} package. 
@@ -59,6 +58,5 @@ result <- tuneandtrainIntSVM(
 )
 result$best_cost
 result$best_model
-result$final_auc
 }
 }

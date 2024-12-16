@@ -1,10 +1,11 @@
 #' Package Title: Robust Tuning and Training for Cross-Source Prediction
 #'
-#' This package provides robust parameter tuning and predictive modeling techniques.
+#' This package provides robust parameter tuning and predictive modeling techniques, useful for situations 
+#' where prediction across different data sources is important and the data distribution varies slightly from source to source.
 #'
-#' The 'RobustPrediction' package helps users build and tune classifiers using methods such as 
-#' 'RobustTuneC', internal, and external tuning approaches. The package supports classifiers 
-#' such as boosting, lasso, ridge, random forest, and support vector machine(SVM). It is intended for scenarios 
+#' The 'RobustPrediction' package helps users build and tune classifiers using the methods  
+#' 'RobustTuneC' method, internal, or external tuning method. The package supports the following classifiers: 
+#' boosting, lasso, ridge, random forest, and support vector machine(SVM). It is intended for scenarios 
 #' where parameter tuning across data sources is important.
 #'
 #' @docType package
@@ -16,7 +17,14 @@
 #' 
 #' The package includes functions for tuning model parameters using three methods:
 #' - **Internal tuning**: Standard cross-validation on the training data to select the best parameters.
-#' - **External tuning**: Parameter tuning based on an external dataset that is independent of the training data.
+#' - **External tuning**: Parameter tuning based on an external dataset that is independent of the training data. This method 
+#'   has two variants controlled by the \code{estperf} argument:
+#'   - **Standard external tuning (\code{estperf = FALSE})**: Parameters are tuned directly using the external dataset. 
+#'     This is the default approach and provides a straightforward method for selecting optimal parameters based on external data.
+#'   - **Conservative external tuning (\code{estperf = TRUE})**: Internal tuning is first performed on the training data, 
+#'     and then the model is evaluated on the external dataset. This approach provides a more conservative (slightly pessimistic) 
+#'     AUC estimate, as described by Ellenbach et al. (2021). For the most accurate performance evaluation, 
+#'     it is recommended to use a second external dataset.
 #' - **RobustTuneC**: A method designed to combine internal and external tuning for better performance in cross-source scenarios.
 #' 
 #' The package supports Lasso, Ridge, Random Forest, Boosting, and SVM classifiers. 

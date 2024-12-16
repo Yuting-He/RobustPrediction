@@ -17,7 +17,7 @@
 #' @param num.trees An integer specifying the number of trees to grow in the Random Forest. Default is 500.
 #'
 #' @return A list containing the best minimum node size (`best_min_node_size`), 
-#'   the final trained model (`best_model`), the AUC of the final model (`final_auc`), and the chosen c value(`best_c`).
+#'   the final trained model (`best_model`), and the chosen c value(`best_c`).
 #' @importFrom ranger ranger
 #' @export
 #'
@@ -31,7 +31,6 @@
 #' result <- tuneandtrainRobustTuneCRF(sample_data_train, sample_data_extern, K = 5, num.trees = 500)
 #' result$best_min_node_size
 #' result$best_model
-#' result$final_auc
 #' result$best_c
 #' }
 tuneandtrainRobustTuneCRF <- function(data, dataext, K = 5, num.trees = 500) {
@@ -141,15 +140,11 @@ tuneandtrainRobustTuneCRF <- function(data, dataext, K = 5, num.trees = 500) {
   
   final_model <- mlr::train(learner_final, task_final, subset = 1:nrow(data))  # Train the model on full data
   
-  # Calculate AUC on the external validation set
-  pred_final <- stats::predict(final_model, newdata = dataext)
-  final_auc <- mlr::performance(pred_final, measures = list(mlr::auc))
   
   # return the result
   res <- list(
     best_min_node_size = min.node.size.c,
     best_model = final_model,
-    final_auc = final_auc,
     best_c = c
   )
   

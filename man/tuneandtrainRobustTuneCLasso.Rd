@@ -27,8 +27,7 @@ variable (factor), and the remaining columns should be the predictor variables.}
 }
 \value{
 A list containing the best lambda value (`best_lambda`), the final trained model (`best_model`), 
-  the AUC on the training data (`final_auc`), the number of active coefficients (`active_set_Train`),
-  and the chosen c value(`best_c`).
+  the number of active coefficients (`active_set_Train`), and the chosen c value(`best_c`).
 }
 \description{
 This function tunes and trains a Lasso classifier using the \code{glmnet} package and the "RobustTuneC" method.
@@ -50,6 +49,5 @@ result <- tuneandtrainRobustTuneCLasso(sample_data_train, sample_data_extern,
   K = 5, maxit = 120000, nlambda = 100)
 result$best_lambda
 result$best_model
-result$final_auc
 result$best_c
 }

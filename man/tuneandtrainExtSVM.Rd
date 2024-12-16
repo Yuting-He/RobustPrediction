@@ -7,6 +7,7 @@
 tuneandtrainExtSVM(
   data,
   dataext,
+  estperf = FALSE,
   kernel = "linear",
   cost_seq = 2^(-15:15),
   scale = FALSE
@@ -19,26 +20,34 @@ and the remaining columns should be the predictor variables.}
 \item{dataext}{A data frame containing the external validation data. The first column should be the response 
 variable (factor), and the remaining columns should be the predictor variables.}
 
-\item{kernel}{A character string specifying the kernel type to be used in the SVM. Default is "linear".}
+\item{estperf}{A logical value indicating whether to use internal tuning with external validation (\code{TRUE}) 
+or external tuning (\code{FALSE}). Default is \code{FALSE}.}
 
-\item{cost_seq}{A numeric vector of cost values to be evaluated. Default is `2^(-15:15)`.}
+\item{kernel}{A character string specifying the kernel type to be used in the SVM. Default is \code{"linear"}.}
 
-\item{scale}{A logical indicating whether to scale the predictor variables. Default is FALSE.}
+\item{cost_seq}{A numeric vector specifying the sequence of cost values to evaluate. Default is \code{2^(-15:15)}.}
+
+\item{scale}{A logical value indicating whether to scale the predictor variables. Default is \code{FALSE}.}
 }
 \value{
-A list containing the best cost value (`best_cost`), the final trained model (`best_model`), 
-  the AUC on the training data (`final_auc`).
+A list containing the following components:
+  \itemize{
+    \item \code{best_cost}: The optimal cost value determined during the tuning process.
+    \item \code{best_model}: The trained SVM model using the selected \code{cost}.
+    \item \code{est_auc}: The AUC value evaluated on the external dataset. This is only returned when \code{estperf = TRUE}, 
+      providing a conservative (slightly pessimistic) estimate of the model's performance.
+  }
 }
 \description{
 This function tunes and trains a Support Vector Machine (SVM) classifier using the \code{mlr} package. 
-The function evaluates a sequence of cost values on an external validation dataset and selects 
-the best model based on the Area Under the Curve (AUC).
+It provides two strategies for tuning the cost parameter based on the \code{estperf} argument:
+\itemize{
+  \item When \code{estperf = FALSE} (default): Hyperparameters are tuned using the external validation dataset. 
+        The \code{cost} value that gives the highest AUC on the external dataset is selected as the best model.
+        However, no AUC value is returned in this case, as per best practices.
+  \item When \code{estperf = TRUE}: Hyperparameters are tuned internally using the training dataset. 
+        The model is then validated on the external dataset to provide a conservative (slightly pessimistic) AUC estimate.
 }
-\details{
-In Support Vector Machines, The \code{cost} parameter controls the trade-off between 
-achieving a low training error and a low testing error. 
-This function trains an SVM model on the training dataset and validates it using the external validation dataset. 
-The cost value that results in the highest AUC on the external validation dataset is chosen as the best model.
 }
 \examples{
 \donttest{
@@ -46,11 +55,18 @@ The cost value that results in the highest AUC on the external validation datase
 data(sample_data_train)
 data(sample_data_extern)
 
-# Example usage
+# Example usage with external tuning (default)
 result <- tuneandtrainExtSVM(sample_data_train, sample_data_extern, kernel = "linear", 
   cost_seq = 2^(-15:15), scale = FALSE)
-result$best_cost
-result$best_model
-result$final_auc
+print(result$best_cost)        # Optimal cost
+print(result$best_model)       # Final trained model
+# Note: est_auc is not returned when estperf = FALSE
+
+# Example usage with internal tuning and external validation
+result_internal <- tuneandtrainExtSVM(sample_data_train, sample_data_extern, 
+  estperf = TRUE, kernel = "linear", cost_seq = 2^(-15:15), scale = FALSE)
+print(result_internal$best_cost)  # Optimal cost
+print(result_internal$best_model) # Final trained model
+print(result_internal$est_auc)    # AUC on external validation dataset
 }
 }

@@ -4,7 +4,7 @@
 \alias{tuneandtrainExtRF}
 \title{Tune and Train External Random Forest}
 \usage{
-tuneandtrainExtRF(data, dataext, num.trees = 500)
+tuneandtrainExtRF(data, dataext, estperf = FALSE, num.trees = 500)
 }
 \arguments{
 \item{data}{A data frame containing the training data. The first column should be the response variable (factor), 
@@ -13,22 +13,30 @@ and the remaining columns should be the predictor variables.}
 \item{dataext}{A data frame containing the external validation data. The first column should be the response 
 variable (factor), and the remaining columns should be the predictor variables.}
 
+\item{estperf}{A logical value indicating whether to use internal tuning with external validation (\code{TRUE}) 
+or external tuning (\code{FALSE}). Default is \code{FALSE}.}
+
 \item{num.trees}{An integer specifying the number of trees in the Random Forest. Default is 500.}
 }
 \value{
-A list containing the best `min.node.size` value(`best_min_node_size`), 
-  the final trained model (`best_model`), and the AUC of the final model (`final_auc`).
+A list containing the following components:
+  \itemize{
+    \item \code{best_min_node_size}: The optimal \code{min.node.size} value determined during the tuning process.
+    \item \code{best_model}: The trained Random Forest model using the selected \code{min.node.size}.
+    \item \code{est_auc}: The AUC value evaluated on the external dataset. This is only returned when \code{estperf = TRUE}, 
+      providing a conservative (slightly pessimistic) estimate of the model's performance.
+  }
 }
 \description{
-This function tunes and trains a Random Forest classifier using the \code{ranger} package. The function 
-evaluates a sequence of \code{min.node.size} values on an external validation dataset and selects 
-the best model based on the Area Under the Curve (AUC).
+This function tunes and trains a Random Forest classifier using the \code{ranger} package. 
+It provides two strategies for tuning the \code{min.node.size} parameter based on the \code{estperf} argument:
+\itemize{
+  \item When \code{estperf = FALSE} (default): Hyperparameters are tuned using the external validation dataset. 
+        The \code{min.node.size} value that gives the highest AUC on the external dataset is selected as the best model.
+        However, no AUC value is returned in this case, as per best practices.
+  \item When \code{estperf = TRUE}: Hyperparameters are tuned internally using the training dataset. 
+        The model is then validated on the external dataset to provide a conservative (slightly pessimistic) AUC estimate.
 }
-\details{
-Random Forest is an ensemble learning method that constructs multiple decision trees and aggregates their predictions. 
-The \code{min.node.size} parameter controls the minimum number of samples in each terminal node, affecting model complexity. 
-This function trains a Random Forest model on the training dataset and validates it using the external validation dataset. 
-The \code{min.node.size} value that results in the highest AUC on the external validation dataset is chosen as the best model.
 }
 \examples{
 \donttest{
@@ -36,10 +44,17 @@ The \code{min.node.size} value that results in the highest AUC on the external v
 data(sample_data_train)
 data(sample_data_extern)
 
-# Example usage
+# Example usage with external tuning (default)
 result <- tuneandtrainExtRF(sample_data_train, sample_data_extern, num.trees = 500)
-result$best_min_node_size
-result$best_model
-result$final_auc
+print(result$best_min_node_size)  # Optimal min.node.size
+print(result$best_model)          # Trained Random Forest model
+# Note: est_auc is not returned when estperf = FALSE
+
+# Example usage with internal tuning and external validation
+result_internal <- tuneandtrainExtRF(sample_data_train, sample_data_extern, 
+  estperf = TRUE, num.trees = 500)
+print(result_internal$best_min_node_size)  # Optimal min.node.size
+print(result_internal$best_model)          # Trained Random Forest model
+print(result_internal$est_auc)             # AUC on external validation dataset
 }
 }

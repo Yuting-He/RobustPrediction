@@ -15,8 +15,7 @@
 #' @param nfolds An integer specifying the number of folds for cross-validation. Default is 5.
 #' @param seed An integer specifying the random seed for reproducibility. Default is 123.
 #'
-#' @return A list containing the best lambda value (`best_lambda`), the final trained model (`best_model`), 
-#'   and the AUC on the training data (`final_auc`).
+#' @return A list containing the best lambda value (`best_lambda`) and the final trained model (`best_model`).
 #' @export
 #'
 #' @examples
@@ -28,7 +27,7 @@
 #'   nlambda = 200, nfolds = 5, seed = 123)
 #' result$best_lambda
 #' result$best_model
-#' result$final_auc
+#' 
 tuneandtrainIntRidge <- function(data, maxit = 120000, nlambda = 200, nfolds = 5, seed = 123) {
   
   # Ensure data is in data frame format
@@ -64,7 +63,7 @@ tuneandtrainIntRidge <- function(data, maxit = 120000, nlambda = 200, nfolds = 5
       pred_Ridge_CV <- stats::predict(fit_Ridge_CV, newx = XTest, s = lamseq, type = "response")
       
       for (i in 1:ncol(pred_Ridge_CV)) {
-        AUC_CV[i, j] <- pROC::auc(response = yTest, predictor = as.numeric(pred_Ridge_CV[, i]))
+        AUC_CV[i, j] <- pROC::auc(response = yTest, predictor = as.numeric(pred_Ridge_CV[, i]), quiet = TRUE)
       }
     }
   }
@@ -78,17 +77,10 @@ tuneandtrainIntRidge <- function(data, maxit = 120000, nlambda = 200, nfolds = 5
   final_model <- glmnet::glmnet(x = X, y = y, family = "binomial", maxit = maxit, 
                                 lambda = best_lambda, alpha = 0, standardize = TRUE)
   
-  # Predict on the training data using the optimal lambda value
-  pred_Ridge_Train <- stats::predict(final_model, newx = X, s = best_lambda, type = "response")
-  
-  # Calculate AUC on the training data
-  AUC_Train <- pROC::auc(response = y, predictor = as.numeric(pred_Ridge_Train))
-  
   # Return the result
   res <- list(
     best_lambda = best_lambda,
-    best_model = final_model,
-    final_auc = AUC_Train
+    best_model = final_model
   )
   
   # Set class

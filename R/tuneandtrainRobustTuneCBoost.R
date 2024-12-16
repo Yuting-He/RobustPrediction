@@ -15,7 +15,7 @@
 #'   increasing by 5 each time, up to 1000.
 #' @param nu Learning rate for the boosting algorithm. Default is 0.1.
 #' @return A list containing the best number of boosting iterations (`best_mstop`), 
-#'   the final trained model (`best_model`), the AUC of the final model (`final_auc`), and the chosen c value(`best_c`).
+#'   the final trained model (`best_model`), and the chosen c value(`best_c`).
 #'   
 #' @export
 #' 
@@ -29,7 +29,6 @@
 #' result <- tuneandtrainRobustTuneCBoost(sample_data_train, sample_data_extern, mstop_seq = mstop_seq)
 #' result$best_mstop
 #' result$best_model
-#' result$final_auc
 #' result$best_c
 tuneandtrainRobustTuneCBoost <- function(data, dataext, K = 5, mstop_seq = seq(5, 1000, by = 5), nu = 0.1) {
   
@@ -68,7 +67,7 @@ tuneandtrainRobustTuneCBoost <- function(data, dataext, K = 5, mstop_seq = seq(5
         pred_Boost_CV <- stats::predict(fit_Boost_CV[mstop_seq[i]], newdata = XTest, type = "response")
         
         # 1-AUC
-        AUC_CV[i, j] <- 1 - pROC::auc(response = yTest, predictor = pred_Boost_CV[, 1])
+        AUC_CV[i, j] <- 1 - pROC::auc(response = yTest, predictor = pred_Boost_CV[, 1], quiet = TRUE)
       }
     }
   }
@@ -94,7 +93,7 @@ tuneandtrainRobustTuneCBoost <- function(data, dataext, K = 5, mstop_seq = seq(5
     }
     
     pred_Boost_Test.c <- stats::predict(fit_Boost_CV[mstop.c], newdata = x_test, type = "response")
-    AUC_Test.c[i] <- pROC::auc(response = y_test, predictor = pred_Boost_Test.c[, 1])[1]
+    AUC_Test.c[i] <- pROC::auc(response = y_test, predictor = pred_Boost_Test.c[, 1], quiet = TRUE)[1]
     
     i <- i + 1
   }
@@ -117,15 +116,11 @@ tuneandtrainRobustTuneCBoost <- function(data, dataext, K = 5, mstop_seq = seq(5
                                   control = mboost::boost_control(mstop = mstop.c, nu = nu),
                                   center = FALSE)
   
-  # Calculate AUC on the external validation set
-  final_predictions <- stats::predict(final_model, newdata = x_test, type = "response")
-  final_auc <- pROC::auc(response = y_test, predictor = final_predictions[, 1])
   
   # Return the result
   res <- list(
     best_mstop = mstop.c,
     best_model = final_model,
-    final_auc = final_auc,
     best_c = c_val
   )
   

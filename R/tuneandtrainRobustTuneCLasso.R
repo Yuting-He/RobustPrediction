@@ -17,8 +17,7 @@
 #' @param nlambda The number of lambda values to use for cross-validation. Default is 100.
 #'
 #' @return A list containing the best lambda value (`best_lambda`), the final trained model (`best_model`), 
-#'   the AUC on the training data (`final_auc`), the number of active coefficients (`active_set_Train`),
-#'   and the chosen c value(`best_c`).
+#'   the number of active coefficients (`active_set_Train`), and the chosen c value(`best_c`).
 #'
 #' @export
 #'
@@ -32,7 +31,6 @@
 #'   K = 5, maxit = 120000, nlambda = 100)
 #' result$best_lambda
 #' result$best_model
-#' result$final_auc
 #' result$best_c
 tuneandtrainRobustTuneCLasso <- function(data, dataext, K = 5, maxit = 120000, nlambda = 100) {
   
@@ -67,7 +65,7 @@ tuneandtrainRobustTuneCLasso <- function(data, dataext, K = 5, maxit = 120000, n
       
       # Determine 1-AUC to choose 'best' model
       for (i in 1:ncol(pred_Lasso_CV)) {
-        AUC_CV[i,j] <- 1 - pROC::auc(response = XTest[,1], predictor = pred_Lasso_CV[,i])
+        AUC_CV[i,j] <- 1 - pROC::auc(response = XTest[,1], predictor = pred_Lasso_CV[,i], quiet = TRUE)
       }
     }
   }
@@ -96,7 +94,7 @@ tuneandtrainRobustTuneCLasso <- function(data, dataext, K = 5, maxit = 120000, n
     }
     
     pred_Lasso <- stats::predict(fit_Lasso, newx = as.matrix(dataext[,2:ncol(dataext)]), s = lambda.c, type = "response")
-    AUC_Test.c[i] <- pROC::auc(response = as.factor(dataext[,1]), predictor = pred_Lasso[,1])
+    AUC_Test.c[i] <- pROC::auc(response = as.factor(dataext[,1]), predictor = pred_Lasso[,1], quiet = TRUE)
     
     i <- i + 1
   }
@@ -117,10 +115,6 @@ tuneandtrainRobustTuneCLasso <- function(data, dataext, K = 5, maxit = 120000, n
   final_model <- glmnet::glmnet(x = as.matrix(data[,2:ncol(data)]), y = as.factor(data[,1]), 
                                 family = "binomial", lambda = lambda.c, standardize = TRUE)
   
-  # Calculate AUC on the external validation set using pROC package
-  final_predictions <- stats::predict(final_model, newx = as.matrix(dataext[,2:ncol(dataext)]), type = "response")
-  final_auc <- pROC::auc(response = as.factor(dataext[,1]), predictor = final_predictions[,1])
-  
   # Count the number of active coefficients
   active_set_Train <- length(stats::coef(final_model, s = lambda.c)@x)
   
@@ -128,7 +122,6 @@ tuneandtrainRobustTuneCLasso <- function(data, dataext, K = 5, maxit = 120000, n
   res <- list(
     best_lambda = lambda.c,
     best_model = final_model,
-    final_auc = final_auc,
     active_set_Train = active_set_Train,
     best_c = c
   )

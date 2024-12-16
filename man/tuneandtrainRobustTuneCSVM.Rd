@@ -33,7 +33,7 @@ It can be "linear", "polynomial", "radial", or "sigmoid". Default is "linear".}
 }
 \value{
 A list containing the best cost value (`best_cost`), the final trained model (`best_model`), 
-  the AUC of the final model (`final_auc`), and the chosen c value(`best_c`).
+  and the chosen c value(`best_c`).
 }
 \description{
 This function tunes and trains a Support Vector Machine (SVM) classifier using the "RobustTuneC" method. 
@@ -59,7 +59,6 @@ result <- tuneandtrainRobustTuneCSVM(sample_data_train, sample_data_extern, K = 
                                      kernel = "linear", cost_seq = 2^(-15:15), scale = FALSE)
 result$best_cost
 result$best_model
-result$final_auc
 result$best_c
 }
 }

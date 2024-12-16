@@ -15,8 +15,8 @@
 #' @param nfolds An integer specifying the number of folds for cross-validation. Default is 5.
 #' @param seed An integer specifying the random seed for reproducibility. Default is 123.
 #'
-#' @return A list containing the best `min.node.size` value (`best_min_node_size`), 
-#'   the final trained model (`best_model`), and the AUC on the training data (`final_auc`).
+#' @return A list containing the best `min.node.size` value (`best_min_node_size`) and
+#'   the final trained model (`best_model`).
 #' @importFrom ranger ranger
 #' @export
 #'
@@ -29,7 +29,6 @@
 #' result <- tuneandtrainIntRF(sample_data_train, num.trees = 500, nfolds = 5, seed = 123)
 #' result$best_min_node_size
 #' result$best_model
-#' result$final_auc
 #' }
 tuneandtrainIntRF <- function(data, num.trees = 500, nfolds = 5, seed = 123) {
   
@@ -88,17 +87,10 @@ tuneandtrainIntRF <- function(data, num.trees = 500, nfolds = 5, seed = 123) {
   
   final_model <- mlr::train(final_lrn, final_task, subset = 1:nrow(data))
   
-  # Predict on the training data using the optimal min.node.size
-  pred_Lasso_Train <- stats::predict(final_model, task = final_task, subset = 1:nrow(data))
-  
-  # Calculate AUC on the training data
-  AUC_Train <- mlr::performance(pred_Lasso_Train, measures = mlr::auc)
-  
   # Return the result
   res <- list(
     best_min_node_size = best_min.node.size,
-    best_model = final_model,
-    final_auc = AUC_Train
+    best_model = final_model
   )
   
   # Set class

@@ -18,7 +18,7 @@ and the remaining columns should be the predictor variables.}
 }
 \value{
 A list containing the best lambda value (`best_lambda`), the final trained model (`best_model`), 
-  the AUC on the training data (`final_auc`), and the number of active coefficients (`active_set_Train`).
+  and the number of active coefficients (`active_set_Train`).
 }
 \description{
 This function tunes and trains a Lasso classifier using the \code{glmnet} package. The function 
@@ -38,6 +38,5 @@ data(sample_data_train)
 result <- tuneandtrainIntLasso(sample_data_train, maxit = 120000, nlambda = 200, nfolds = 5)
 result$best_lambda
 result$best_model
-result$final_auc
 result$active_set_Train
 }

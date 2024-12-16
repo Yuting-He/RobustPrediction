@@ -4,47 +4,67 @@
 \alias{tuneandtrainExtBoost}
 \title{Tune and Train External Boosting}
 \usage{
-tuneandtrainExtBoost(data, dataext, mstop_seq = seq(5, 1000, by = 5), nu = 0.1)
+tuneandtrainExtBoost(
+  data,
+  dataext,
+  estperf = FALSE,
+  mstop_seq = seq(5, 1000, by = 5),
+  nu = 0.1
+)
 }
 \arguments{
-\item{data}{A data frame containing the training data. The first column should be the 
-response variable (factor), and the remaining columns should be the predictor 
-variables.}
+\item{data}{A data frame containing the training data. The first column should be the response variable (factor), 
+and the remaining columns should be the predictor variables.}
 
-\item{dataext}{A data frame containing the external validation data. The first column 
-should be the response variable (factor), and the remaining columns should be the 
-predictor variables.}
+\item{dataext}{A data frame containing the external validation data. The first column should be the response variable 
+(factor), and the remaining columns should be the predictor variables.}
 
-\item{mstop_seq}{A numeric vector of boosting iterations to be evaluated. Default is a 
-sequence starting at 5 and increasing by 5 each time, up to 1000.}
+\item{estperf}{A logical value indicating whether to use internal tuning with external validation (\code{TRUE}) 
+or external tuning (\code{FALSE}). Default is \code{FALSE}.}
 
-\item{nu}{A numeric value for the learning rate. Default is 0.1.}
+\item{mstop_seq}{A numeric vector specifying the sequence of boosting iterations to evaluate. 
+Default is \code{seq(5, 1000, by = 5)}.}
+
+\item{nu}{A numeric value specifying the learning rate for boosting. Default is \code{0.1}.}
 }
 \value{
-A list containing the best number of boosting iterations (`best_mstop`), 
-  the final trained model (`best_model`), and the AUC of the final model (`final_auc`).
+A list containing the following components:
+  \itemize{
+    \item \code{best_mstop}: The optimal number of boosting iterations determined during the tuning process.
+    \item \code{best_model}: The trained Boosting model using the selected \code{mstop}.
+    \item \code{est_auc}: The AUC value evaluated on the external dataset. This is only returned when \code{estperf = TRUE}, 
+      providing a conservative (slightly pessimistic) estimate of the model's performance.
+  }
 }
 \description{
-This function tunes and trains a Boosting classifier using the \code{mboost::glmboost} 
-function. The function evaluates a sequence of boosting iterations (mstop) on the 
-provided external validation dataset and selects the best model based on the AUC (Area Under the Curve) metric.
+This function tunes and trains a Boosting classifier using the \code{mboost::glmboost} function.
+It provides two strategies for tuning the number of boosting iterations (\code{mstop}) based on 
+the \code{estperf} argument:
+\itemize{
+  \item When \code{estperf = FALSE} (default): Hyperparameters are tuned using the external validation dataset. 
+        The \code{mstop} value that gives the highest AUC on the external dataset is selected as the best model.
+        However, no AUC value is returned in this case, as per best practices.
+  \item When \code{estperf = TRUE}: Hyperparameters are tuned internally using the training dataset. 
+        The model is then validated on the external dataset to provide a conservative (slightly pessimistic) AUC estimate.
 }
-\details{
-The function first fits an initial Boosting model on the training data using the specified
-learning rate (\code{nu}) and evaluates different values of \code{mstop} on the external validation set.
-The \code{mstop} value with the highest AUC is chosen as the best model, and the final model is trained
-using this optimal \code{mstop}.
 }
 \examples{
 # Load sample data
 data(sample_data_train)
 data(sample_data_extern)
 
-# Example usage
+# Example usage with external tuning (default)
 mstop_seq <- seq(50, 500, by = 50)
 result <- tuneandtrainExtBoost(sample_data_train, sample_data_extern, 
   mstop_seq = mstop_seq, nu = 0.1)
-result$best_mstop
-result$best_model
-result$final_auc
+print(result$best_mstop)         # Optimal mstop
+print(result$best_model)         # Trained Boosting model
+# Note: est_auc is not returned when estperf = FALSE
+
+# Example usage with internal tuning and external validation
+result_internal <- tuneandtrainExtBoost(sample_data_train, sample_data_extern, 
+  estperf = TRUE, mstop_seq = mstop_seq, nu = 0.1)
+print(result_internal$best_mstop) # Optimal mstop
+print(result_internal$best_model) # Trained Boosting model
+print(result_internal$est_auc)    # AUC on external validation dataset
 }

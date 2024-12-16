@@ -14,8 +14,8 @@
 #'   from 5 to 1000 with a step of 5.
 #' @param nu A numeric value for the learning rate. Default is 0.1.
 #'
-#' @return A list containing the best number of boosting iterations (`best_mstop`), 
-#'   the final Boosting classifier model (`best_model`) and the AUC on the training data (`final_auc`).
+#' @return A list containing the best number of boosting iterations (`best_mstop`) and
+#'   the final Boosting classifier model (`best_model`).
 #' 
 #' @export
 #'
@@ -29,7 +29,6 @@
 #' result <- tuneandtrainIntBoost(sample_data_train, mstop_seq, nu = 0.1)
 #' result$best_mstop
 #' result$best_model
-#' result$final_auc
 #' }
 tuneandtrainIntBoost <- function(data, mstop_seq = seq(5, 1000, by = 5), nu = 0.1) {
   
@@ -72,7 +71,7 @@ tuneandtrainIntBoost <- function(data, mstop_seq = seq(5, 1000, by = 5), nu = 0.
         pred_Boost_CV <- as.vector(stats::predict(fit_Boost_CV[mseq], newdata = as.matrix(XTest[, -1]), type = "response"))
         
         # Determine AUC using pROC package
-        AUC_CV[i, j] <- pROC::auc(response = as.factor(XTest[, 1]), predictor = pred_Boost_CV)
+        AUC_CV[i, j] <- pROC::auc(response = as.factor(XTest[, 1]), predictor = pred_Boost_CV, quiet = TRUE)
       }
     }
   }
@@ -87,15 +86,10 @@ tuneandtrainIntBoost <- function(data, mstop_seq = seq(5, 1000, by = 5), nu = 0.
                                   control = mboost::boost_control(mstop = chosen_mstop, nu = nu),
                                   center = FALSE)
   
-  # Predict on the whole Train dataset using the optimal mstop value
-  pred_Boost_Train <- as.vector(stats::predict(final_model, newdata = as.matrix(Train[, -1]), type = "response"))
-  AUC_Train <- pROC::auc(response = as.factor(Train[, 1]), predictor = pred_Boost_Train)
-  
   # Return the result
   res <- list(
     best_mstop = chosen_mstop,
-    best_model = final_model,
-    final_auc = AUC_Train
+    best_model = final_model
   )
   
   # Set class

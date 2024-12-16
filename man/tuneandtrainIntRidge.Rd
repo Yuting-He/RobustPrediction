@@ -25,8 +25,7 @@ and the remaining columns should be the predictor variables.}
 \item{seed}{An integer specifying the random seed for reproducibility. Default is 123.}
 }
 \value{
-A list containing the best lambda value (`best_lambda`), the final trained model (`best_model`), 
-  and the AUC on the training data (`final_auc`).
+A list containing the best lambda value (`best_lambda`) and the final trained model (`best_model`).
 }
 \description{
 This function tunes and trains a Ridge classifier using the \code{glmnet} package. The function 
@@ -47,5 +46,5 @@ result <- tuneandtrainIntRidge(sample_data_train, maxit = 120000,
   nlambda = 200, nfolds = 5, seed = 123)
 result$best_lambda
 result$best_model
-result$final_auc
+
 }

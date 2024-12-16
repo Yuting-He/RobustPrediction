@@ -17,8 +17,8 @@ and the remaining columns should be the predictor variables.}
 \item{seed}{An integer specifying the random seed for reproducibility. Default is 123.}
 }
 \value{
-A list containing the best `min.node.size` value (`best_min_node_size`), 
-  the final trained model (`best_model`), and the AUC on the training data (`final_auc`).
+A list containing the best `min.node.size` value (`best_min_node_size`) and
+  the final trained model (`best_model`).
 }
 \description{
 This function tunes and trains a Random Forest classifier using the \code{ranger} package with internal cross-validation. 
@@ -40,6 +40,5 @@ data(sample_data_train)
 result <- tuneandtrainIntRF(sample_data_train, num.trees = 500, nfolds = 5, seed = 123)
 result$best_min_node_size
 result$best_model
-result$final_auc
 }
 }

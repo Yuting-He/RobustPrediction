@@ -18,7 +18,7 @@
 #' @param nlambda The number of lambda values to use for cross-validation. Default is 100.
 #'
 #' @return A list containing the best lambda value (`best_lambda`), the final trained model (`best_model`), 
-#'   the AUC of the final model (`final_auc`), and the chosen c value(`best_c`).
+#'   and the chosen c value(`best_c`).
 #' @export
 #'
 #' @examples
@@ -31,7 +31,6 @@
 #'   K = 5, maxit = 120000, nlambda = 100)
 #' result$best_lambda
 #' result$best_model
-#' result$final_auc
 #' result$best_c
 tuneandtrainRobustTuneCRidge <- function(data, dataext, K = 5, maxit = 120000, nlambda = 100) {
   
@@ -66,7 +65,7 @@ tuneandtrainRobustTuneCRidge <- function(data, dataext, K = 5, maxit = 120000, n
       
       # Determine AUC to choose 'best' model using pROC package
       for (i in 1:ncol(pred_Ridge_CV)) {
-        AUC_CV[i, j] <- 1 - pROC::auc(response = XTest[, 1], predictor = pred_Ridge_CV[, i])
+        AUC_CV[i, j] <- 1 - pROC::auc(response = XTest[, 1], predictor = pred_Ridge_CV[, i], quiet = TRUE)
       }
     }
   }
@@ -95,7 +94,7 @@ tuneandtrainRobustTuneCRidge <- function(data, dataext, K = 5, maxit = 120000, n
     }
     
     pred_Ridge <- stats::predict(fit_Ridge, newx = as.matrix(dataext[, 2:ncol(dataext)]), s = lambda.c, type = "response")
-    AUC_Test.c[i] <- pROC::auc(response = as.factor(dataext[, 1]), predictor = pred_Ridge[, 1])
+    AUC_Test.c[i] <- pROC::auc(response = as.factor(dataext[, 1]), predictor = pred_Ridge[, 1], quiet = TRUE)
     
     i <- i + 1
   }
@@ -115,15 +114,11 @@ tuneandtrainRobustTuneCRidge <- function(data, dataext, K = 5, maxit = 120000, n
   final_model <- glmnet::glmnet(x = as.matrix(data[, 2:ncol(data)]), y = as.factor(data[, 1]), 
                                 family = "binomial", lambda = lambda.c, alpha = 0, standardize = TRUE)
   
-  # Calculate AUC on the external validation set using pROC package
-  final_predictions <- stats::predict(final_model, newx = as.matrix(dataext[, 2:ncol(dataext)]), type = "response")
-  final_auc <- pROC::auc(response = as.factor(dataext[, 1]), predictor = final_predictions[, 1])
   
   # Return result:
   res <- list(
     best_lambda = lambda.c,
     best_model = final_model,
-    final_auc = final_auc,
     best_c = c
   )
   

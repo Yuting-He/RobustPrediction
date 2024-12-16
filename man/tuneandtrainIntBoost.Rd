@@ -16,8 +16,8 @@ from 5 to 1000 with a step of 5.}
 \item{nu}{A numeric value for the learning rate. Default is 0.1.}
 }
 \value{
-A list containing the best number of boosting iterations (`best_mstop`), 
-  the final Boosting classifier model (`best_model`) and the AUC on the training data (`final_auc`).
+A list containing the best number of boosting iterations (`best_mstop`) and
+  the final Boosting classifier model (`best_model`).
 }
 \description{
 This function tunes and trains a Boosting classifier using the \code{mboost} package. The function 
@@ -39,6 +39,5 @@ mstop_seq <- seq(5, 5000, by = 5)
 result <- tuneandtrainIntBoost(sample_data_train, mstop_seq, nu = 0.1)
 result$best_mstop
 result$best_model
-result$final_auc
 }
 }

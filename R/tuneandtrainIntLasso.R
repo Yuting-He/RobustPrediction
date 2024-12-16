@@ -15,7 +15,7 @@
 #' @param nfolds An integer specifying the number of folds for cross-validation. Default is 5.
 #'
 #' @return A list containing the best lambda value (`best_lambda`), the final trained model (`best_model`), 
-#'   the AUC on the training data (`final_auc`), and the number of active coefficients (`active_set_Train`).
+#'   and the number of active coefficients (`active_set_Train`).
 #' @export
 #'
 #' @examples
@@ -26,7 +26,6 @@
 #' result <- tuneandtrainIntLasso(sample_data_train, maxit = 120000, nlambda = 200, nfolds = 5)
 #' result$best_lambda
 #' result$best_model
-#' result$final_auc
 #' result$active_set_Train
 
 tuneandtrainIntLasso <- function(data, maxit = 120000, nlambda = 200, nfolds = 5) {
@@ -60,7 +59,7 @@ tuneandtrainIntLasso <- function(data, maxit = 120000, nlambda = 200, nfolds = 5
       pred_Lasso_CV <- stats::predict(fit_Lasso_CV, newx = XTest, s = lamseq, type = "response")
       
       for (i in 1:ncol(pred_Lasso_CV)) {
-        AUC_CV[i, j] <- pROC::auc(response = yTest, predictor = pred_Lasso_CV[, i])
+        AUC_CV[i, j] <- pROC::auc(response = yTest, predictor = pred_Lasso_CV[, i], quiet = TRUE)
       }
     }
   }
@@ -74,10 +73,6 @@ tuneandtrainIntLasso <- function(data, maxit = 120000, nlambda = 200, nfolds = 5
   final_model <- glmnet::glmnet(x = X, y = y, family = "binomial", 
                                 maxit = maxit, lambda = best_lambda, standardize = TRUE)
   
-  # Determine AUC on the full training set with the best lambda using pROC package
-  pred_Lasso_Train <- stats::predict(final_model, newx = X, s = best_lambda, type = "response")
-  AUC_Train <- pROC::auc(response = y, predictor = as.numeric(pred_Lasso_Train))
-  
   # Count the number of active coefficients
   active_set_Train <- length(stats::coef(final_model, s = best_lambda)@x)
   
@@ -85,7 +80,6 @@ tuneandtrainIntLasso <- function(data, maxit = 120000, nlambda = 200, nfolds = 5
   res <- list(
     best_lambda = best_lambda,
     best_model = final_model,
-    final_auc = AUC_Train,
     active_set_Train = active_set_Train
   )
   

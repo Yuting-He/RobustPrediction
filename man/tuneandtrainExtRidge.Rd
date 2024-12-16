@@ -4,7 +4,13 @@
 \alias{tuneandtrainExtRidge}
 \title{Tune and Train External Ridge}
 \usage{
-tuneandtrainExtRidge(data, dataext, maxit = 120000, nlambda = 100)
+tuneandtrainExtRidge(
+  data,
+  dataext,
+  estperf = FALSE,
+  maxit = 120000,
+  nlambda = 100
+)
 }
 \arguments{
 \item{data}{A data frame containing the training data. The first column should be the response variable (factor), 
@@ -13,32 +19,48 @@ and the remaining columns should be the predictor variables.}
 \item{dataext}{A data frame containing the external validation data. The first column should be the response 
 variable (factor), and the remaining columns should be the predictor variables.}
 
+\item{estperf}{A logical value indicating whether to use internal tuning with external validation (\code{TRUE}) 
+or external tuning (\code{FALSE}). Default is \code{FALSE}.}
+
 \item{maxit}{An integer specifying the maximum number of iterations. Default is 120000.}
 
 \item{nlambda}{An integer specifying the number of lambda values to use in the Ridge model. Default is 100.}
 }
 \value{
-A list containing the best lambda value (`best_lambda`), the final trained model (`best_model`), 
-  the AUC of the final model on the training data (`final_auc`).
+A list containing the following components:
+  \itemize{
+    \item \code{best_lambda}: The optimal \code{lambda} value determined during the tuning process.
+    \item \code{best_model}: The trained Ridge model using the selected \code{lambda}.
+    \item \code{est_auc}: The AUC value evaluated on the external dataset. This is only returned when \code{estperf = TRUE}, 
+      providing a conservative (slightly pessimistic) estimate of the model's performance.
+  }
 }
 \description{
-This function tunes and trains a Ridge classifier using the \code{glmnet} package. The function 
-evaluates a sequence of lambda (regularization) values on an external validation dataset and selects 
-the best model based on the Area Under the Curve (AUC).
+This function tunes and trains a Ridge classifier using the \code{glmnet} package. 
+It provides two strategies for tuning the regularization parameter \code{lambda} based on the \code{estperf} argument:
+\itemize{
+  \item When \code{estperf = FALSE} (default): Hyperparameters are tuned using the external validation dataset. 
+        The \code{lambda} value that gives the highest AUC on the external dataset is selected as the best model.
+        However, no AUC value is returned in this case, as per best practices.
+  \item When \code{estperf = TRUE}: Hyperparameters are tuned internally using the training dataset. 
+        The model is then validated on the external dataset to provide a conservative (slightly pessimistic) AUC estimate.
 }
-\details{
-This function trains a logistic Ridge regression model on the training dataset and validates it on the external 
-validation dataset. The lambda value that gives the highest AUC on the external validation dataset is selected 
-as the best model.
 }
 \examples{
 # Load sample data
 data(sample_data_train)
 data(sample_data_extern)
 
-# Example usage
+# Example usage with external tuning (default)
 result <- tuneandtrainExtRidge(sample_data_train, sample_data_extern, maxit = 120000, nlambda = 100)
-result$best_lambda
-result$best_model
-result$final_auc
+print(result$best_lambda)       # Optimal lambda
+print(result$best_model)        # Final trained model
+# Note: est_auc is not returned when estperf = FALSE
+
+# Example usage with internal tuning and external validation
+result_internal <- tuneandtrainExtRidge(sample_data_train, sample_data_extern, 
+  estperf = TRUE, maxit = 120000, nlambda = 100)
+print(result_internal$best_lambda)  # Optimal lambda
+print(result_internal$best_model)   # Final trained model
+print(result_internal$est_auc)      # AUC on external validation dataset
 }
